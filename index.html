@@ -48,19 +48,6 @@
         gap: 10px;
     }
 
-    .logo-mark {
-        width: 32px;
-        height: 32px;
-        background: var(--accent);
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 900;
-        font-size: 14px;
-        color: #000;
-    }
-
     .nav-title {
         font-size: 16px;
         font-weight: 800;
@@ -343,7 +330,7 @@
         display: flex;
         gap: 4px;
         flex-wrap: wrap;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
 
     .chip {
@@ -353,6 +340,52 @@
         border-radius: 4px;
         border: 1px solid var(--border);
         color: var(--gray);
+    }
+
+    .qty-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .qty-label {
+        font-size: 12px;
+        color: var(--gray);
+    }
+
+    .qty-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+    }
+
+    .qty-btn {
+        width: 26px;
+        height: 26px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--white);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s;
+    }
+
+    .qty-btn:hover {
+        border-color: var(--accent);
+    }
+
+    .qty-val {
+        font-size: 14px;
+        font-weight: 700;
+        min-width: 20px;
+        text-align: center;
     }
 
     .add-btn {
@@ -371,7 +404,6 @@
     .add-btn:hover {
         background: var(--accent);
         color: #000;
-        border-color: var(--accent);
         transform: translateY(-1px);
     }
 
@@ -385,9 +417,9 @@
 
     .cart-drawer {
         position: fixed;
-        right: -420px;
+        right: -460px;
         top: 0;
-        width: 420px;
+        width: 460px;
         height: 100vh;
         background: #131313;
         border-left: 1px solid var(--border);
@@ -474,6 +506,39 @@
         color: var(--accent);
     }
 
+    .cart-item-qty {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .cart-qty-btn {
+        width: 22px;
+        height: 22px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--white);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cart-qty-btn:hover {
+        border-color: var(--accent);
+    }
+
+    .cart-qty-val {
+        font-size: 13px;
+        font-weight: 600;
+        min-width: 16px;
+        text-align: center;
+    }
+
     .remove-item {
         background: none;
         border: none;
@@ -506,12 +571,44 @@
     .cart-total {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 16px;
+        margin-bottom: 4px;
         font-weight: 700;
     }
 
     .cart-total span:last-child {
         color: var(--accent);
+    }
+
+    .cart-total-usd {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .cart-total-usd span:last-child {
+        color: var(--gray);
+        font-size: 13px;
+    }
+
+    .email-input {
+        width: 100%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--white);
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 10px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .email-input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .email-input::placeholder {
+        color: var(--gray);
     }
 
     .payment-select {
@@ -524,6 +621,7 @@
         font-size: 13px;
         margin-bottom: 12px;
         cursor: pointer;
+        font-family: 'Inter', sans-serif;
     }
 
     .checkout-btn {
@@ -554,6 +652,151 @@
         box-shadow: none;
     }
 
+    .wallet-info {
+        font-size: 11px;
+        color: var(--gray);
+        text-align: center;
+        margin-top: 8px;
+    }/* Order Confirmation Modal */
+
+    .confirm-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 400;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .confirm-modal.show {
+        display: flex;
+    }
+
+    .confirm-box {
+        background: #141414;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+    }
+
+    .confirm-icon {
+        width: 64px;
+        height: 64px;
+        background: rgba(232, 255, 0, 0.1);
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 20px;
+    }
+
+    .confirm-box h2 {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .confirm-box p {
+        color: var(--gray);
+        font-size: 14px;
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+
+    .confirm-order-id {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 12px;
+        color: var(--gray);
+        margin-bottom: 12px;
+    }
+
+    .confirm-order-id span {
+        color: var(--white);
+        font-family: monospace;
+    }
+
+    .confirm-tx {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .confirm-tx p {
+        font-size: 11px;
+        color: var(--gray);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+    }
+
+    .confirm-tx a {
+        color: var(--accent);
+        font-size: 11px;
+        font-family: monospace;
+        word-break: break-all;
+        text-decoration: none;
+    }
+
+    .confirm-tx a:hover {
+        text-decoration: underline;
+    }
+
+    .confirm-items {
+        text-align: left;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .confirm-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+    }
+
+    .confirm-item:last-child {
+        border-bottom: none;
+    }
+
+    .confirm-item span:last-child {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .confirm-close-btn {
+        width: 100%;
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .confirm-close-btn:hover {
+        background: #f5ff40;
+    }
+
     .overlay {
         position: fixed;
         inset: 0;
@@ -578,20 +821,13 @@
         border-radius: 10px;
         font-size: 14px;
         font-weight: 600;
-        z-index: 300;
+        z-index: 500;
         transition: transform 0.3s;
         white-space: nowrap;
     }
 
     .toast.show {
         transform: translateX(-50%) translateY(0);
-    }
-
-    .wallet-info {
-        font-size: 11px;
-        color: var(--gray);
-        text-align: center;
-        margin-top: 8px;
     }
 
     .footer-link {
@@ -702,17 +938,42 @@
         <div class="cart-footer">
             <div class="cart-total">
                 <span>Total</span>
-                <span id="cartTotal">0 ELMT</span>
+                <span id="cartTotalELMT">0 ELMT</span>
             </div>
-            <select class="payment-select" id="paymentMethod">
+            <div class="cart-total-usd">
+                <span style="font-size:13px;color:var(--gray);">USD Estimate</span>
+                <span id="cartTotalUSD">$0.00</span>
+            </div>
+            <input class="email-input" type="email" id="customerEmail" placeholder="Your email address (required)"/>
+            <select class="payment-select" id="paymentMethod" onchange="handlePaymentMethodChange()">
                 <option value="elmt">Pay with ELMT</option>
                 <option value="eth">Pay with ETH</option>
                 <option value="usdc">Pay with USDC</option>
                 <option value="usdt">Pay with USDT</option>
-                <option value="fiat">Pay with FIAT (Card)</option>
+                <option value="fiat">Pay with Card (Stripe)</option>
             </select>
+            <div id="walletRequiredNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;display:none;">Wallet connection required for crypto payments.</div>
             <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Proceed to Checkout</button>
             <div class="wallet-info" id="walletInfo"></div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-icon">✓</div>
+            <h2>Order Confirmed!</h2>
+            <p id="confirmMsg">Your transaction was successful. A confirmation email has been sent to you.</p>
+            <div class="confirm-order-id">
+                Order ID: 
+                <span id="confirmOrderId"></span>
+            </div>
+            <div class="confirm-tx" id="confirmTxSection" style="display:none;">
+                <p>Transaction Hash</p>
+                <a id="confirmTxLink" href="#" target="_blank"></a>
+            </div>
+            <div class="confirm-items" id="confirmItems"></div>
+            <button class="confirm-close-btn" onclick="closeConfirmModal()">Continue Shopping</button>
         </div>
     </div>
 
@@ -769,17 +1030,52 @@
     const USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
     const USDT_CONTRACT = '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2';
     const BASE_CHAIN_ID = '0x2105';
+    const ERC20_ABI = [
+    {
+        "inputs": [{
+            "name": "_to",
+            "type": "address"
+        }, {
+            "name": "_value",
+            "type": "uint256"
+        }],
+        "name": "transfer",
+        "outputs": [{
+            "name": "",
+            "type": "bool"
+        }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{
+            "name": "_owner",
+            "type": "address"
+        }],
+        "name": "decimals",
+        "outputs": [{
+            "name": "",
+            "type": "uint8"
+        }],
+        "stateMutability": "view",
+        "type": "function"
+    }
+    ];
 
-    let elmtPriceUSD = 0.0001932; // fallback price
+    let elmtPriceUSD = 0.0001932;
+    let walletAddress = null;
+    let cart = [];
+
+    // Product quantity state
+    const productQty = {};
 
     async function fetchELMTPrice() {
         try {
             const res = await fetch('https://api.coingecko.com/api/v3/simple/token_price/base?contract_addresses=0x600d601d8b9eb5de5ac90fefc68d0d08801bfd3f&vs_currencies=usd');
             const data = await res.json();
             const key = Object.keys(data)[0];
-            if (key && data[key].usd) {
+            if (key && data[key].usd)
                 elmtPriceUSD = data[key].usd;
-            }
         } catch (e) {
             console.log('Using fallback ELMT price:', elmtPriceUSD);
         }
@@ -789,15 +1085,18 @@
 
     function updateRateIndicator() {
         const el = document.getElementById('elmtRate');
-        if (el) {
+        if (el)
             el.textContent = '1 ELMT = $' + elmtPriceUSD.toFixed(7) + ' USD';
-        }
     }
 
     function calcELMT(usd) {
         if (elmtPriceUSD <= 0)
             return 0;
         return Math.round(usd / elmtPriceUSD);
+    }
+
+    function generateOrderId() {
+        return 'EU-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
     }
 
     const products = [
@@ -813,7 +1112,8 @@
         soldOut: false,
         isNew: true,
         fulfillment: 'Digital',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT']
+        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
+        maxQty: 10
     },
     {
         id: 2,
@@ -827,7 +1127,8 @@
         soldOut: false,
         isNew: false,
         fulfillment: 'Digital',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT']
+        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
+        maxQty: 10
     },
     {
         id: 3,
@@ -842,7 +1143,8 @@
         isNew: false,
         fulfillment: 'Physical',
         payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
-        comingSoon: true
+        comingSoon: true,
+        maxQty: 10
     },
     {
         id: 4,
@@ -856,34 +1158,39 @@
         soldOut: true,
         isNew: false,
         fulfillment: 'Physical',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT']
+        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
+        maxQty: 3
     },
     {
         id: 5,
         name: 'Element Gold Bullion Coin',
         category: 'collectible',
         categoryLabel: 'Collectible',
-        desc: '1 Troy Oz .9999 Pure Gold. Element United Logo with "Unearth Possibilities" on the front. Groomed edge. Series A. Issued 2022. 30mm, 31.1g.',
+        desc: '1 Troy Oz .9999 Pure Gold. Element United Logo with "Unearth Possibilities" on the front. Grooved edge. Series A. Issued 2022. 30mm, 31.1g.',
         priceUSD: 4558.48,
         img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Gold%20Coin_Feb2025.png',
         icon: '🥇',
         soldOut: true,
         isNew: false,
         fulfillment: 'Physical',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT']
+        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
+        maxQty: 3
     }
     ];
 
-    let cart = [];
-    let walletAddress = null;
+    // Init qty state
+    products.forEach(p => {
+        productQty[p.id] = 1;
+    });
 
     function renderProducts(filter='all') {
         const grid = document.getElementById('productsGrid');
         const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
         grid.innerHTML = filtered.map(p => {
-            const imgHtml = p.img
-            ? `<img src="${p.img}" alt="${p.name}" onload="this.classList.add('loaded')" onerror="this.style.display='none'"/>`
-            : '';
+            const qty = productQty[p.id] || 1;
+            const imgHtml = p.img ? `<img src="${p.img}" alt="${p.name}" onload="this.classList.add('loaded')" onerror="this.style.display='none'"/>` : '';
+            const elmtPrice = p.soldOut && p.category === 'collectible' ? '$' + p.priceUSD.toLocaleString() + ' USD' : calcELMT(p.priceUSD).toLocaleString() + ' ELMT';
+            const usdLabel = p.soldOut && p.category === 'collectible' ? 'Spot price at time of sale' : '≈ $' + p.priceUSD.toLocaleString() + ' USD';
             return `
                 <div class="product-card${p.soldOut ? ' sold-out' : ''}">
                   <div class="product-img">
@@ -899,19 +1206,37 @@
                     <div class="product-desc">${p.desc}</div>
                     <div class="price-row">
                       <div>
-                        <div class="price-elmt">${p.soldOut && p.category === 'collectible' ? '$' + p.priceUSD.toLocaleString() + ' USD' : calcELMT(p.priceUSD).toLocaleString() + ' ELMT'}</div>
-                        <div class="price-usd">${p.soldOut && p.category === 'collectible' ? 'Spot price at time of sale' : '≈ $' + p.priceUSD.toLocaleString() + ' USD'}</div>
+                        <div class="price-elmt">${elmtPrice}</div>
+                        <div class="price-usd">${usdLabel}</div>
                       </div>
                     </div>
-                    <div class="payment-chips">
-                      ${p.payments.map(pay => `<span class="chip">${pay}</span>`).join('')}
-                    </div>
+                    <div class="payment-chips">${p.payments.map(pay => `<span class="chip">${pay}</span>`).join('')}</div>
+                    ${!p.soldOut && !p.comingSoon ? `
+                    <div class="qty-row">
+                      <span class="qty-label">Qty</span>
+                      <div class="qty-controls">
+                        <button class="qty-btn" onclick="changeQty(${p.id},-1)">-</button>
+                        <span class="qty-val" id="qty-${p.id}">${qty}</span>
+                        <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+                        <span style="font-size:11px;color:var(--gray);margin-left:4px;">max ${p.maxQty}</span>
+                      </div>
+                    </div>` : ''}
                     <button class="add-btn" ${p.soldOut || p.comingSoon ? 'disabled' : ''} onclick="addToCart(${p.id})">
                       ${p.soldOut ? 'Sold Out' : p.comingSoon ? 'Coming Soon' : '+ Add to Cart'}
                     </button>
                   </div>
                 </div>`;
         }).join('');
+    }
+
+    function changeQty(id, delta) {
+        const product = products.find(p => p.id === id);
+        const current = productQty[id] || 1;
+        const newQty = Math.max(1, Math.min(product.maxQty, current + delta));
+        productQty[id] = newQty;
+        const el = document.getElementById('qty-' + id);
+        if (el)
+            el.textContent = newQty;
     }
 
     function filterProducts(filter, btn) {
@@ -922,17 +1247,28 @@
 
     function addToCart(id) {
         const product = products.find(p => p.id === id);
+        const qty = productQty[id] || 1;
         const existing = cart.find(i => i.id === id);
         if (existing) {
-            existing.qty++;
+            const newQty = Math.min(product.maxQty, existing.qty + qty);
+            existing.qty = newQty;
         } else {
             cart.push({
                 ...product,
-                qty: 1
+                qty
             });
         }
         updateCart();
-        showToast(`${product.name} added to cart`);
+        showToast(`${product.name} (x${qty}) added to cart`);
+    }
+
+    function updateCartQty(id, delta) {
+        const item = cart.find(i => i.id === id);
+        if (!item)
+            return;
+        const product = products.find(p => p.id === id);
+        item.qty = Math.max(1, Math.min(product.maxQty, item.qty + delta));
+        updateCart();
     }
 
     function removeFromCart(id) {
@@ -943,27 +1279,38 @@
     function updateCart() {
         const count = cart.reduce((s, i) => s + i.qty, 0);
         document.getElementById('cartCount').textContent = count;
-        const total = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
-        document.getElementById('cartTotal').textContent = total.toLocaleString() + ' ELMT';
+        const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0);
+        const totalELMT = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
+        document.getElementById('cartTotalELMT').textContent = totalELMT.toLocaleString() + ' ELMT';
+        document.getElementById('cartTotalUSD').textContent = '$' + totalUSD.toFixed(2);
         const itemsEl = document.getElementById('cartItems');
         if (cart.length === 0) {
             itemsEl.innerHTML = '<div class="cart-empty"><div style="font-size:40px;">🛒</div><p>Your cart is empty</p></div>';
         } else {
             itemsEl.innerHTML = cart.map(i => {
-                const thumbHtml = i.img
-                ? `<img src="${i.img}" alt="${i.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"/>`
-                : i.icon;
+                const thumbHtml = i.img ? `<img src="${i.img}" alt="${i.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"/>` : i.icon;
                 return `
                       <div class="cart-item">
                         <div class="cart-item-icon">${thumbHtml}</div>
                         <div class="cart-item-info">
-                          <div class="cart-item-name">${i.name}${i.qty > 1 ? ' x' + i.qty : ''}</div>
-                          <div class="cart-item-price">${(calcELMT(i.priceUSD) * i.qty).toLocaleString()} ELMT</div>
+                          <div class="cart-item-name">${i.name}</div>
+                          <div class="cart-item-price">$${(i.priceUSD * i.qty).toFixed(2)} USD</div>
+                          <div class="cart-item-qty">
+                            <button class="cart-qty-btn" onclick="updateCartQty(${i.id},-1)">-</button>
+                            <span class="cart-qty-val">${i.qty}</span>
+                            <button class="cart-qty-btn" onclick="updateCartQty(${i.id},1)">+</button>
+                          </div>
                         </div>
                         <button class="remove-item" onclick="removeFromCart(${i.id})">✕</button>
                       </div>`;
             }).join('');
         }
+    }
+
+    function handlePaymentMethodChange() {
+        const method = document.getElementById('paymentMethod').value;
+        const note = document.getElementById('walletRequiredNote');
+        note.style.display = method !== 'fiat' ? 'block' : 'none';
     }
 
     function toggleCart() {
@@ -1027,21 +1374,203 @@
         }
     }
 
-    function checkout() {
+    async function sendERC20(contractAddress, toAddress, amountUSD, decimals) {
+        const provider = window.ethereum;
+        const amountWei = BigInt(Math.round(amountUSD * (10 ** decimals)));
+        const data = '0xa9059cbb' +
+        toAddress.slice(2).padStart(64, '0') +
+        amountWei.toString(16).padStart(64, '0');
+        const txParams = {
+            from: walletAddress,
+            to: contractAddress,
+            data: data,
+            chainId: BASE_CHAIN_ID
+        };
+        return await provider.request({
+            method: 'eth_sendTransaction',
+            params: [txParams]
+        });
+    }
+
+    async function sendETH(toAddress, amountUSD) {
+        const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const ethData = await ethPriceRes.json();
+        const ethPrice = ethData.ethereum.usd;
+        const ethAmount = amountUSD / ethPrice;
+        const weiAmount = BigInt(Math.round(ethAmount * 1e18));
+        const txParams = {
+            from: walletAddress,
+            to: toAddress,
+            value: '0x' + weiAmount.toString(16),
+            chainId: BASE_CHAIN_ID
+        };
+        return await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [txParams]
+        });
+    }
+
+    async function checkout() {
         if (cart.length === 0) {
             showToast('Your cart is empty');
             return;
         }
+
+        const customerEmail = document.getElementById('customerEmail').value.trim();
+        if (!customerEmail || !customerEmail.includes('@')) {
+            showToast('Please enter a valid email address');
+            document.getElementById('customerEmail').focus();
+            return;
+        }
+
         const method = document.getElementById('paymentMethod').value;
-        if (method !== 'fiat' && !walletAddress) {
+        const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0);
+        const totalELMT = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
+        const orderId = generateOrderId();
+
+        if (method === 'fiat') {
+            await checkoutStripe(customerEmail, orderId);
+            return;
+        }
+
+        if (!walletAddress) {
             showToast('Please connect your wallet first');
             return;
         }
-        if (method === 'fiat') {
-            showToast('Redirecting to Stripe checkout...');
-        } else {
-            showToast('Initiating ' + method.toUpperCase() + ' transaction...');
+
+        const btn = document.getElementById('checkoutBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        try {
+            let txHash;
+
+            if (method === 'elmt') {
+                const elmtAmount = totalELMT;
+                txHash = await sendERC20(ELMT_CONTRACT, ELEMENT_WALLET, elmtAmount, 18);
+            } else if (method === 'eth') {
+                txHash = await sendETH(ELEMENT_WALLET, totalUSD);
+            } else if (method === 'usdc') {
+                txHash = await sendERC20(USDC_CONTRACT, ELEMENT_WALLET, totalUSD, 6);
+            } else if (method === 'usdt') {
+                txHash = await sendERC20(USDT_CONTRACT, ELEMENT_WALLET, totalUSD, 6);
+            }
+
+            // Send confirmation emails
+            await fetch('/.netlify/functions/send-confirmation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    customerEmail,
+                    customerName: '',
+                    orderId,
+                    txHash,
+                    paymentMethod: method.toUpperCase(),
+                    cart: cart.map(i => ({
+                        name: i.name,
+                        qty: i.qty,
+                        priceUSD: i.priceUSD
+                    })),
+                    total: totalELMT.toLocaleString() + ' ELMT (≈ $' + totalUSD.toFixed(2) + ' USD)'
+                })
+            });
+
+            showConfirmModal(orderId, txHash, method.toUpperCase(), totalUSD, totalELMT);
+            cart = [];
+            updateCart();
+            toggleCart();
+
+        } catch (e) {
+            console.error(e);
+            if (e.code === 4001) {
+                showToast('Transaction cancelled');
+            } else {
+                showToast('Transaction failed. Please try again.');
+            }
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Proceed to Checkout';
         }
+    }
+
+    async function checkoutStripe(customerEmail, orderId) {
+        const btn = document.getElementById('checkoutBtn');
+        btn.disabled = true;
+        btn.textContent = 'Redirecting...';
+        try {
+            const res = await fetch('/.netlify/functions/create-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cart: cart.map(i => ({
+                        id: i.id,
+                        name: i.name,
+                        qty: i.qty,
+                        priceUSD: i.priceUSD,
+                        fulfillment: i.fulfillment
+                    })),
+                    customerEmail,
+                    successUrl: window.location.origin + '?order=success&id=' + orderId,
+                    cancelUrl: window.location.href
+                })
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                showToast('Stripe error: ' + (data.error || 'Unknown error'));
+                btn.disabled = false;
+                btn.textContent = 'Proceed to Checkout';
+            }
+        } catch (e) {
+            showToast('Could not connect to payment processor');
+            btn.disabled = false;
+            btn.textContent = 'Proceed to Checkout';
+        }
+    }
+
+    function showConfirmModal(orderId, txHash, method, totalUSD, totalELMT) {
+        document.getElementById('confirmOrderId').textContent = orderId;
+        const txSection = document.getElementById('confirmTxSection');
+        const txLink = document.getElementById('confirmTxLink');
+        if (txHash) {
+            txSection.style.display = 'block';
+            txLink.href = 'https://basescan.org/tx/' + txHash;
+            txLink.textContent = txHash;
+        }
+        document.getElementById('confirmItems').innerHTML = cart.map(i => `
+            <div class="confirm-item">
+              <span>${i.name} x${i.qty}</span>
+              <span>$${(i.priceUSD * i.qty).toFixed(2)}</span>
+            </div>
+          `).join('') + `
+            <div class="confirm-item" style="border-top:1px solid var(--border);font-weight:700;">
+              <span>Total</span>
+              <span>$${totalUSD.toFixed(2)}</span>
+            </div>`;
+        document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('show');
+    }
+
+    // Handle Stripe success redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('order') === 'success') {
+        const orderId = urlParams.get('id') || 'N/A';
+        setTimeout(() => {
+            document.getElementById('confirmOrderId').textContent = orderId;
+            document.getElementById('confirmMsg').textContent = 'Your card payment was successful. A confirmation email has been sent to you.';
+            document.getElementById('confirmTxSection').style.display = 'none';
+            document.getElementById('confirmItems').innerHTML = '<div class="confirm-item"><span>Payment processed via Stripe</span></div>';
+            document.getElementById('confirmModal').classList.add('show');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 800);
     }
 
     function showToast(msg) {
