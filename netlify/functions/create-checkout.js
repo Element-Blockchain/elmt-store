@@ -4,6 +4,7 @@ const PRICE_IDS = {
   1: 'price_1TccqaE4dO5YNsqV4vLJuPZ8', // Smart Node Boost NFT
   2: 'price_1TccsmE4dO5YNsqVFoeVBes5', // Heirloom NFT
   3: 'price_1TccxJE4dO5YNsqVdQYxnSBs', // Element Swag Pack 1
+  99: 'price_1TduHwE4dO5YNsqVdIX2nh4e', // $1 Test Product
 };
 
 exports.handler = async (event) => {
