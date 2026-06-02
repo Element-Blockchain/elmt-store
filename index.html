@@ -4,6 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>ELMT.Store</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * {
@@ -1337,95 +1338,41 @@
     }
 
     async function connectWallet() {
-        const btn = document.getElementById('connectBtn');
-        if (walletAddress) {
-            walletAddress = null;
-            btn.textContent = 'Connect Wallet';
-            btn.classList.remove('connected');
-            document.getElementById('walletInfo').textContent = '';
+        if (window._w3mConnected && window.walletAddress) {
+            await window._web3modal.disconnect();
             showToast('Wallet disconnected');
             return;
         }
-        if (typeof window.ethereum === 'undefined') {
-            showToast('MetaMask not detected. Please install MetaMask.');
-            return;
-        }
-        try {
-            btn.textContent = 'Connecting...';
-            const accounts = await window.ethereum.request({
-                method: 'eth_requestAccounts'
-            });
-            walletAddress = accounts[0];
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{
-                        chainId: BASE_CHAIN_ID
-                    }]
-                });
-            } catch (e) {
-                if (e.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: BASE_CHAIN_ID,
-                            chainName: 'Base',
-                            nativeCurrency: {
-                                name: 'ETH',
-                                symbol: 'ETH',
-                                decimals: 18
-                            },
-                            rpcUrls: ['https://mainnet.base.org'],
-                            blockExplorerUrls: ['https://basescan.org']
-                        }]
-                    });
-                }
-            }
-            const short = walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4);
-            btn.textContent = short;
-            btn.classList.add('connected');
-            document.getElementById('walletInfo').textContent = 'Connected: ' + short;
-            showToast('Wallet connected to Base');
-        } catch (e) {
-            btn.textContent = 'Connect Wallet';
-            showToast('Connection cancelled');
-        }
+        window._web3modal.open();
+    }
+
+    async function getEthersSigner() {
+        if (!window._w3mProvider)
+            throw new Error('No wallet connected');
+        const provider = new ethers.BrowserProvider(window._w3mProvider);
+        return await provider.getSigner();
     }
 
     async function sendERC20(contractAddress, toAddress, amountUSD, decimals) {
-        const provider = window.ethereum;
-        const amountWei = BigInt(Math.round(amountUSD * (10 ** decimals)));
-        const data = '0xa9059cbb' +
-        toAddress.slice(2).padStart(64, '0') +
-        amountWei.toString(16).padStart(64, '0');
-        const txParams = {
-            from: walletAddress,
-            to: contractAddress,
-            data: data,
-            chainId: BASE_CHAIN_ID
-        };
-        return await provider.request({
-            method: 'eth_sendTransaction',
-            params: [txParams]
-        });
+        const signer = await getEthersSigner();
+        const erc20Abi = ['function transfer(address to, uint256 amount) returns (bool)'];
+        const contract = new ethers.Contract(contractAddress, erc20Abi, signer);
+        const amountBN = ethers.parseUnits(amountUSD.toFixed(decimals), decimals);
+        const tx = await contract.transfer(toAddress, amountBN);
+        return tx.hash;
     }
 
     async function sendETH(toAddress, amountUSD) {
+        const signer = await getEthersSigner();
         const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
         const ethData = await ethPriceRes.json();
         const ethPrice = ethData.ethereum.usd;
-        const ethAmount = amountUSD / ethPrice;
-        const weiAmount = BigInt(Math.round(ethAmount * 1e18));
-        const txParams = {
-            from: walletAddress,
+        const ethAmount = (amountUSD / ethPrice).toFixed(18);
+        const tx = await signer.sendTransaction({
             to: toAddress,
-            value: '0x' + weiAmount.toString(16),
-            chainId: BASE_CHAIN_ID
-        };
-        return await window.ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [txParams]
+            value: ethers.parseEther(ethAmount)
         });
+        return tx.hash;
     }
 
     async function checkout() {
@@ -1451,7 +1398,7 @@
             return;
         }
 
-        if (!walletAddress) {
+        if (!window.walletAddress) {
             showToast('Please connect your wallet first');
             return;
         }
@@ -1464,8 +1411,7 @@
             let txHash;
 
             if (method === 'elmt') {
-                const elmtAmount = totalELMT;
-                txHash = await sendERC20(ELMT_CONTRACT, ELEMENT_WALLET, elmtAmount, 18);
+                txHash = await sendERC20(ELMT_CONTRACT, ELEMENT_WALLET, totalUSD / elmtPriceUSD, 18);
             } else if (method === 'eth') {
                 txHash = await sendETH(ELEMENT_WALLET, totalUSD);
             } else if (method === 'usdc') {
@@ -1599,6 +1545,61 @@
     }
 
     fetchELMTPrice();
+    </script>
+
+    <script type="module">
+    import { createWeb3Modal, defaultConfig } from 'https://esm.sh/@web3modal/ethers@4.2.3';
+
+    const projectId = 'e5c89d315442f18024d5eaf69925c63c';
+    const base = {
+        chainId: 8453,
+        name: 'Base',
+        currency: 'ETH',
+        explorerUrl: 'https://basescan.org',
+        rpcUrl: 'https://mainnet.base.org'
+    };
+    const metadata = {
+        name: 'ELMT.Store',
+        description: 'The Official Element United Store',
+        url: 'https://elmt.store',
+        icons: ['https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png']
+    };
+
+    const modal = createWeb3Modal({
+        ethersConfig: defaultConfig({
+            metadata
+        }),
+        chains: [base],
+        projectId,
+        themeMode: 'dark',
+        themeVariables: {
+            '--w3m-accent': '#e8ff00',
+            '--w3m-border-radius-master': '8px'
+        }
+    });
+
+    window._web3modal = modal;
+
+    modal.subscribeProvider(({provider, address, isConnected}) => {
+        window._w3mProvider = provider;
+        window._w3mAddress = address;
+        window._w3mConnected = isConnected;
+        const btn = document.getElementById('connectBtn');
+        const walletInfo = document.getElementById('walletInfo');
+        if (isConnected && address) {
+            const short = address.slice(0, 6) + '...' + address.slice(-4);
+            btn.textContent = short;
+            btn.classList.add('connected');
+            walletInfo.textContent = 'Connected: ' + short;
+            window.walletAddress = address;
+            showToast('Wallet connected to Base');
+        } else {
+            btn.textContent = 'Connect Wallet';
+            btn.classList.remove('connected');
+            walletInfo.textContent = '';
+            window.walletAddress = null;
+        }
+    });
     </script>
 </body>
 </html>
