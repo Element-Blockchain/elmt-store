@@ -4,7 +4,6 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>ELMT.Store</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * {
@@ -956,6 +955,7 @@
                 <option value="usdt">Pay with USDT</option>
                 <option value="fiat">Pay with Card (Stripe)</option>
             </select>
+            <div id="networkFeeNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;display:none;">⚠️ Paying on Ethereum mainnet will incur higher gas fees. For lower fees, switch your wallet to Base network.</div>
             <div id="walletRequiredNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;display:none;">Wallet connection required for crypto payments.</div>
             <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Proceed to Checkout</button>
             <div class="wallet-info" id="walletInfo"></div>
@@ -1329,7 +1329,15 @@
     function handlePaymentMethodChange() {
         const method = document.getElementById('paymentMethod').value;
         const note = document.getElementById('walletRequiredNote');
+        const feeNote = document.getElementById('networkFeeNote');
         note.style.display = method !== 'fiat' ? 'block' : 'none';
+        // Show Ethereum fee warning if user's wallet is on mainnet
+        if (method !== 'fiat' && window._web3modal) {
+            const chainId = window._web3modal.getChainId ? window._web3modal.getChainId() : null;
+            feeNote.style.display = chainId === 1 ? 'block' : 'none';
+        } else {
+            feeNote.style.display = 'none';
+        }
     }
 
     function toggleCart() {
@@ -1346,24 +1354,17 @@
         window._web3modal.open();
     }
 
-    async function getEthersSigner() {
-        if (!window._w3mProvider)
-            throw new Error('No wallet connected');
-        const provider = new ethers.BrowserProvider(window._w3mProvider);
-        return await provider.getSigner();
-    }
-
-    async function sendERC20(contractAddress, toAddress, amountUSD, decimals) {
-        const signer = await getEthersSigner();
+    async function sendERC20(contractAddress, toAddress, amount, decimals) {
+        const signer = await window.getEthersSigner();
         const erc20Abi = ['function transfer(address to, uint256 amount) returns (bool)'];
         const contract = new ethers.Contract(contractAddress, erc20Abi, signer);
-        const amountBN = ethers.parseUnits(amountUSD.toFixed(decimals), decimals);
+        const amountBN = ethers.parseUnits(amount.toFixed(decimals), decimals);
         const tx = await contract.transfer(toAddress, amountBN);
         return tx.hash;
     }
 
     async function sendETH(toAddress, amountUSD) {
-        const signer = await getEthersSigner();
+        const signer = await window.getEthersSigner();
         const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
         const ethData = await ethPriceRes.json();
         const ethPrice = ethData.ethereum.usd;
@@ -1547,59 +1548,214 @@
     fetchELMTPrice();
     </script>
 
-    <script type="module">
-    import { createWeb3Modal, defaultConfig } from 'https://esm.sh/@web3modal/ethers@4.2.3';
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.17.0/dist/index.umd.js"></script>
+    <script>
+    (async function() {
+        const WCProvider = global['@walletconnect/ethereum-provider'].EthereumProvider;
 
-    const projectId = 'e5c89d315442f18024d5eaf69925c63c';
-    const base = {
-        chainId: 8453,
-        name: 'Base',
-        currency: 'ETH',
-        explorerUrl: 'https://basescan.org',
-        rpcUrl: 'https://mainnet.base.org'
-    };
-    const metadata = {
-        name: 'ELMT.Store',
-        description: 'The Official Element United Store',
-        url: 'https://elmt.store',
-        icons: ['https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png']
-    };
+        const projectId = 'e5c89d315442f18024d5eaf69925c63c';
 
-    const modal = createWeb3Modal({
-        ethersConfig: defaultConfig({
-            metadata
-        }),
-        chains: [base],
-        projectId,
-        themeMode: 'dark',
-        themeVariables: {
-            '--w3m-accent': '#e8ff00',
-            '--w3m-border-radius-master': '8px'
+        let wcProvider = null;
+
+        async function initWC() {
+            wcProvider = await WCProvider.init({
+                projectId,
+                chains: [8453],
+                optionalChains: [1],
+                showQrModal: true,
+                qrModalOptions: {
+                    themeMode: 'dark',
+                    themeVariables: {
+                        '--wcm-accent-color': '#e8ff00',
+                        '--wcm-background-color': '#141414'
+                    }
+                },
+                metadata: {
+                    name: 'ELMT.Store',
+                    description: 'The Official Element United Store',
+                    url: 'https://elmt.store',
+                    icons: ['https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png']
+                },
+                rpcMap: {
+                    8453: 'https://base.llamarpc.com',
+                    1: 'https://eth.llamarpc.com'
+                }
+            });
+
+            wcProvider.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    handleConnected(accounts[0]);
+                } else {
+                    handleDisconnected();
+                }
+            });
+
+            wcProvider.on('disconnect', () => {
+                handleDisconnected();
+            });
+
+            // Restore previous session if exists
+            if (wcProvider.session) {
+                const accounts = wcProvider.accounts;
+                if (accounts && accounts.length > 0) {
+                    handleConnected(accounts[0]);
+                }
+            }
         }
-    });
 
-    window._web3modal = modal;
-
-    modal.subscribeProvider(({provider, address, isConnected}) => {
-        window._w3mProvider = provider;
-        window._w3mAddress = address;
-        window._w3mConnected = isConnected;
-        const btn = document.getElementById('connectBtn');
-        const walletInfo = document.getElementById('walletInfo');
-        if (isConnected && address) {
+        function handleConnected(address) {
             const short = address.slice(0, 6) + '...' + address.slice(-4);
+            const btn = document.getElementById('connectBtn');
             btn.textContent = short;
             btn.classList.add('connected');
-            walletInfo.textContent = 'Connected: ' + short;
+            document.getElementById('walletInfo').textContent = 'Connected: ' + short;
             window.walletAddress = address;
-            showToast('Wallet connected to Base');
-        } else {
+            window._wcProvider = wcProvider;
+            showToast('Wallet connected');
+        }
+
+        function handleDisconnected() {
+            const btn = document.getElementById('connectBtn');
             btn.textContent = 'Connect Wallet';
             btn.classList.remove('connected');
-            walletInfo.textContent = '';
+            document.getElementById('walletInfo').textContent = '';
             window.walletAddress = null;
+            window._wcProvider = null;
         }
-    });
+
+        window.connectWallet = async function() {
+            if (!wcProvider)
+                await initWC();
+            if (window.walletAddress) {
+                await wcProvider.disconnect();
+                handleDisconnected();
+                showToast('Wallet disconnected');
+                return;
+            }
+            try {
+                await wcProvider.connect({
+                    chains: [8453],
+                    optionalChains: [1]
+                });
+                const accounts = wcProvider.accounts;
+                if (accounts && accounts.length > 0) {
+                    handleConnected(accounts[0]);
+                }
+            } catch (e) {
+                showToast('Connection cancelled');
+            }
+        };
+
+        window.getEthersSigner = async function() {
+            if (!window._wcProvider)
+                throw new Error('No wallet connected');
+            const provider = new ethers.BrowserProvider(window._wcProvider);
+            return await provider.getSigner();
+        };
+
+        // Also support injected wallets (MetaMask desktop extension)
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0 && !window._wcProvider) {
+                    window.walletAddress = accounts[0];
+                    const short = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
+                    document.getElementById('connectBtn').textContent = short;
+                    document.getElementById('connectBtn').classList.add('connected');
+                    document.getElementById('walletInfo').textContent = 'Connected: ' + short;
+                }
+            });
+        }
+
+        // Override connectWallet to handle injected (MetaMask) vs WalletConnect
+        window.connectWallet = async function() {
+            if (window.walletAddress) {
+                // Disconnect
+                if (window._wcProvider) {
+                    await window._wcProvider.disconnect();
+                }
+                handleDisconnected();
+                showToast('Wallet disconnected');
+                return;
+            }
+
+            // Show choice: injected (MetaMask) or WalletConnect
+            if (typeof window.ethereum !== 'undefined') {
+                // Has injected wallet -- try it first
+                try {
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_requestAccounts'
+                    });
+                    if (accounts.length > 0) {
+                        // Switch to Base
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{
+                                    chainId: '0x2105'
+                                }]
+                            });
+                        } catch (e) {
+                            if (e.code === 4902) {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0x2105',
+                                        chainName: 'Base',
+                                        nativeCurrency: {
+                                            name: 'ETH',
+                                            symbol: 'ETH',
+                                            decimals: 18
+                                        },
+                                        rpcUrls: ['https://base.llamarpc.com'],
+                                        blockExplorerUrls: ['https://basescan.org']
+                                    }]
+                                });
+                            }
+                        }
+                        window.walletAddress = accounts[0];
+                        window._injectedProvider = window.ethereum;
+                        const short = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
+                        document.getElementById('connectBtn').textContent = short;
+                        document.getElementById('connectBtn').classList.add('connected');
+                        document.getElementById('walletInfo').textContent = 'Connected: ' + short;
+                        showToast('Wallet connected to Base');
+                        return;
+                    }
+                } catch (e) {
+                    if (e.code === 4001) {
+                        showToast('Connection cancelled');
+                        return;
+                    }
+                }
+            }
+
+            // No injected wallet -- use WalletConnect
+            if (!wcProvider)
+                await initWC();
+            try {
+                await wcProvider.connect({
+                    chains: [8453],
+                    optionalChains: [1]
+                });
+                const accounts = wcProvider.accounts;
+                if (accounts && accounts.length > 0)
+                    handleConnected(accounts[0]);
+            } catch (e) {
+                showToast('Connection cancelled');
+            }
+        };
+
+        window.getEthersSigner = async function() {
+            const provider = window._injectedProvider || window._wcProvider;
+            if (!provider)
+                throw new Error('No wallet connected');
+            const ethersProvider = new ethers.BrowserProvider(provider);
+            return await ethersProvider.getSigner();
+        };
+
+        initWC();
+    })();
     </script>
 </body>
 </html>
