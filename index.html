@@ -1,1761 +1,881 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>ELMT.Store</title>
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    :root {
-        --bg: #0d0d0d;
-        --surface: #141414;
-        --surface2: #1a1a1a;
-        --accent: #e8ff00;
-        --white: #fff;
-        --gray: #888;
-        --border: #2a2a2a;
-        --danger: #e24b4a;
-    }
-
-    body {
-        background: var(--bg);
-        color: var(--white);
-        font-family: 'Inter', sans-serif;
-        min-height: 100vh;
-    }
-
-    nav {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 5%;
-        border-bottom: 1px solid var(--border);
-        background: #131313;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-
-    .nav-logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .nav-title {
-        font-size: 16px;
-        font-weight: 800;
-        letter-spacing: 0.05em;
-    }
-
-    .nav-title span {
-        color: var(--accent);
-    }
-
-    .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .cart-btn {
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        color: var(--white);
-        padding: 8px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: border-color 0.2s;
-    }
-
-    .cart-btn:hover {
-        border-color: var(--accent);
-    }
-
-    .cart-count {
-        background: var(--accent);
-        color: #000;
-        font-size: 10px;
-        font-weight: 800;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .connect-btn {
-        background: var(--accent);
-        color: #000;
-        border: 1px solid transparent;
-        padding: 8px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 800;
-        transition: all 0.2s;
-    }
-
-    .connect-btn:hover {
-        background: var(--surface2);
-        color: var(--white);
-        border-color: var(--accent);
-    }
-
-    .connect-btn.connected {
-        background: var(--surface2);
-        color: var(--accent);
-        border: 1px solid var(--accent);
-        font-size: 12px;
-    }
-
-    .connect-btn.connected:hover {
-        border-color: var(--white);
-    }
-
-    .hero {
-        padding: 60px 5% 40px;
-        text-align: center;
-    }
-
-    .hero h1 {
-        font-size: clamp(28px, 5vw, 52px);
-        font-weight: 900;
-        letter-spacing: -0.02em;
-        margin-bottom: 12px;
-    }
-
-    .hero h1 span {
-        color: var(--accent);
-    }
-
-    .hero p {
-        color: var(--gray);
-        font-size: 16px;
-        max-width: 480px;
-        margin: 0 auto;
-    }
-
-    .filter-bar {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0 5% 32px;
-        flex-wrap: wrap;
-        max-width: 2000px;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    .filter-btn {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        color: var(--gray);
-        padding: 6px 14px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-
-    .filter-btn:hover, .filter-btn.active {
-        background: rgba(232, 255, 0, 0.1);
-        border-color: var(--accent);
-        color: var(--accent);
-    }
-
-    .products {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        padding: 0 5% 80px;
-        max-width: 2000px;
-        margin: 0 auto;
-        width: 100%;
-    }
-
-    .product-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        overflow: hidden;
-        transition: border-color 0.2s;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .product-card:hover {
-        border-color: rgba(232, 255, 0, 0.3);
-    }
-
-    .product-card.sold-out {
-        opacity: 0.6;
-    }
-
-    .product-img {
-        width: 100%;
-        aspect-ratio: 1/1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--surface2);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .product-img img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        position: absolute;
-        top: 0;
-        left: 0;
-        padding: 12px;
-    }
-
-    .product-img .img-icon {
-        font-size: 64px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .product-img img.loaded + .img-icon {
-        display: none;
-    }
-
-    .sold-out-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: var(--danger);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 800;
-        padding: 4px 10px;
-        border-radius: 20px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        z-index: 2;
-    }
-
-    .new-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: var(--accent);
-        color: #000;
-        font-size: 10px;
-        font-weight: 800;
-        padding: 4px 10px;
-        border-radius: 20px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        z-index: 2;
-    }
-
-    .fulfillment-badge {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        background: rgba(0, 0, 0, 0.7);
-        color: var(--gray);
-        font-size: 10px;
-        font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 20px;
-        letter-spacing: 0.06em;
-        z-index: 2;
-    }
-
-    .product-body {
-        padding: 20px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .product-category {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--accent);
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-    }
-
-    .product-name {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-
-    .product-desc {
-        font-size: 13px;
-        color: var(--gray);
-        line-height: 1.6;
-        margin-bottom: 16px;
-        flex: 1;
-    }
-
-    .price-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 14px;
-    }
-
-    .price-elmt {
-        font-size: 18px;
-        font-weight: 800;
-        color: var(--accent);
-    }
-
-    .price-usd {
-        font-size: 12px;
-        color: var(--gray);
-        margin-top: 2px;
-    }
-
-    .payment-chips {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-        margin-bottom: 12px;
-    }
-
-    .chip {
-        font-size: 10px;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 4px;
-        border: 1px solid var(--border);
-        color: var(--gray);
-    }
-
-    .qty-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 12px;
-    }
-
-    .qty-label {
-        font-size: 12px;
-        color: var(--gray);
-    }
-
-    .qty-controls {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-left: auto;
-    }
-
-    .qty-btn {
-        width: 26px;
-        height: 26px;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        color: var(--white);
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: border-color 0.2s;
-    }
-
-    .qty-btn:hover {
-        border-color: var(--accent);
-    }
-
-    .qty-val {
-        font-size: 14px;
-        font-weight: 700;
-        min-width: 20px;
-        text-align: center;
-    }
-
-    .add-btn {
-        width: 100%;
-        background: #000;
-        color: var(--white);
-        border: 1px solid var(--accent);
-        padding: 12px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .add-btn:hover {
-        background: var(--accent);
-        color: #000;
-        transform: translateY(-1px);
-    }
-
-    .add-btn:disabled {
-        background: var(--border);
-        color: var(--gray);
-        border-color: var(--border);
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .cart-drawer {
-        position: fixed;
-        right: -460px;
-        top: 0;
-        width: 460px;
-        height: 100vh;
-        background: #131313;
-        border-left: 1px solid var(--border);
-        z-index: 200;
-        transition: right 0.3s;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .cart-drawer.open {
-        right: 0;
-    }
-
-    .cart-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .cart-header h3 {
-        font-size: 16px;
-        font-weight: 700;
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        color: var(--gray);
-        font-size: 20px;
-        cursor: pointer;
-        padding: 4px;
-    }
-
-    .close-btn:hover {
-        color: var(--white);
-    }
-
-    .cart-items {
-        flex: 1;
-        overflow-y: auto;
-        padding: 16px 24px;
-    }
-
-    .cart-item {
-        display: flex;
-        gap: 12px;
-        padding: 12px 0;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .cart-item-icon {
-        width: 48px;
-        height: 48px;
-        background: var(--surface2);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        flex-shrink: 0;
-        overflow: hidden;
-    }
-
-    .cart-item-icon img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .cart-item-info {
-        flex: 1;
-    }
-
-    .cart-item-name {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-
-    .cart-item-price {
-        font-size: 13px;
-        color: var(--accent);
-    }
-
-    .cart-item-qty {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 6px;
-    }
-
-    .cart-qty-btn {
-        width: 22px;
-        height: 22px;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        color: var(--white);
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .cart-qty-btn:hover {
-        border-color: var(--accent);
-    }
-
-    .cart-qty-val {
-        font-size: 13px;
-        font-weight: 600;
-        min-width: 16px;
-        text-align: center;
-    }
-
-    .remove-item {
-        background: none;
-        border: none;
-        color: var(--gray);
-        cursor: pointer;
-        font-size: 18px;
-        padding: 4px;
-    }
-
-    .remove-item:hover {
-        color: var(--danger);
-    }
-
-    .cart-empty {
-        text-align: center;
-        padding: 60px 24px;
-        color: var(--gray);
-    }
-
-    .cart-empty p {
-        margin-top: 12px;
-        font-size: 14px;
-    }
-
-    .cart-footer {
-        padding: 20px 24px;
-        border-top: 1px solid var(--border);
-    }
-
-    .cart-total {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 4px;
-        font-weight: 700;
-    }
-
-    .cart-total span:last-child {
-        color: var(--accent);
-    }
-
-    .cart-total-usd {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 16px;
-    }
-
-    .cart-total-usd span:last-child {
-        color: var(--gray);
-        font-size: 13px;
-    }
-
-    .email-input {
-        width: 100%;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        color: var(--white);
-        padding: 10px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        margin-bottom: 10px;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .email-input:focus {
-        outline: none;
-        border-color: var(--accent);
-    }
-
-    .email-input::placeholder {
-        color: var(--gray);
-    }
-
-    .payment-select {
-        width: 100%;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        color: var(--white);
-        padding: 10px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        margin-bottom: 12px;
-        cursor: pointer;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .checkout-btn {
-        width: 100%;
-        background: var(--white);
-        color: #000;
-        border: none;
-        padding: 14px;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .checkout-btn:hover {
-        background: var(--accent);
-        color: #000;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(232, 255, 0, 0.3);
-    }
-
-    .checkout-btn:disabled {
-        background: var(--border);
-        color: var(--gray);
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .wallet-info {
-        font-size: 11px;
-        color: var(--gray);
-        text-align: center;
-        margin-top: 8px;
-    }/* Order Confirmation Modal */
-
-    .confirm-modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 400;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .confirm-modal.show {
-        display: flex;
-    }
-
-    .confirm-box {
-        background: #141414;
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 40px;
-        max-width: 500px;
-        width: 100%;
-        text-align: center;
-        position: relative;
-    }
-
-    .confirm-icon {
-        width: 64px;
-        height: 64px;
-        background: rgba(232, 255, 0, 0.1);
-        border: 2px solid var(--accent);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        margin: 0 auto 20px;
-    }
-
-    .confirm-box h2 {
-        font-size: 22px;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }
-
-    .confirm-box p {
-        color: var(--gray);
-        font-size: 14px;
-        margin-bottom: 24px;
-        line-height: 1.6;
-    }
-
-    .confirm-order-id {
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 10px 16px;
-        font-size: 12px;
-        color: var(--gray);
-        margin-bottom: 12px;
-    }
-
-    .confirm-order-id span {
-        color: var(--white);
-        font-family: monospace;
-    }
-
-    .confirm-tx {
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 10px 16px;
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-    .confirm-tx p {
-        font-size: 11px;
-        color: var(--gray);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 4px;
-    }
-
-    .confirm-tx a {
-        color: var(--accent);
-        font-size: 11px;
-        font-family: monospace;
-        word-break: break-all;
-        text-decoration: none;
-    }
-
-    .confirm-tx a:hover {
-        text-decoration: underline;
-    }
-
-    .confirm-items {
-        text-align: left;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
-
-    .confirm-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--border);
-        font-size: 13px;
-    }
-
-    .confirm-item:last-child {
-        border-bottom: none;
-    }
-
-    .confirm-item span:last-child {
-        color: var(--accent);
-        font-weight: 700;
-    }
-
-    .confirm-close-btn {
-        width: 100%;
-        background: var(--accent);
-        color: #000;
-        border: none;
-        padding: 14px;
-        border-radius: 10px;
-        font-size: 15px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .confirm-close-btn:hover {
-        background: #f5ff40;
-    }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 150;
-        display: none;
-    }
-
-    .overlay.show {
-        display: block;
-    }
-
-    .toast {
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%) translateY(80px);
-        background: var(--surface);
-        border: 1px solid var(--accent);
-        color: var(--white);
-        padding: 12px 24px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        z-index: 500;
-        transition: transform 0.3s;
-        white-space: nowrap;
-    }
-
-    .toast.show {
-        transform: translateX(-50%) translateY(0);
-    }
-
-    .footer-link {
-        color: var(--gray);
-        font-size: 12px;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .footer-link:hover {
-        color: var(--accent);
-    }
-
-    @media (max-width: 1600px) {
-        .products {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-
-    @media (max-width: 1100px) {
-        .products {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-
-    @media (max-width: 768px) {
-        .products {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 480px) {
-        .products {
-            grid-template-columns: 1fr;
-        }
-
-        .cart-drawer {
-            width: 100%;
-        }
-    }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ELMT.Store</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0d0d0d;--surface:#141414;--surface2:#1a1a1a;--accent:#e8ff00;--white:#fff;--gray:#888;--border:#2a2a2a;--danger:#e24b4a;}
+body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 5%;border-bottom:1px solid var(--border);background:#131313;position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-title{font-size:16px;font-weight:800;letter-spacing:0.05em;}
+.nav-title span{color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.cart-btn{background:var(--surface2);border:1px solid var(--border);color:var(--white);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;transition:border-color 0.2s;}
+.cart-btn:hover{border-color:var(--accent);}
+.cart-count{background:var(--accent);color:#000;font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.connect-btn{background:var(--accent);color:#000;border:1px solid transparent;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:800;transition:all 0.2s;}
+.connect-btn:hover{background:var(--surface2);color:var(--white);border-color:var(--accent);}
+.connect-btn.connected{background:var(--surface2);color:var(--accent);border:1px solid var(--accent);font-size:12px;}
+.connect-btn.connected:hover{border-color:var(--white);}
+.hero{padding:60px 5% 40px;text-align:center;}
+.hero h1{font-size:clamp(28px,5vw,52px);font-weight:900;letter-spacing:-0.02em;margin-bottom:12px;}
+.hero h1 span{color:var(--accent);}
+.hero p{color:var(--gray);font-size:16px;max-width:480px;margin:0 auto;}
+.filter-bar{display:flex;align-items:center;gap:8px;padding:0 5% 32px;flex-wrap:wrap;max-width:2000px;margin:0 auto;width:100%;}
+.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--gray);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.2s;}
+.filter-btn:hover,.filter-btn.active{background:rgba(232,255,0,0.1);border-color:var(--accent);color:var(--accent);}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:0 5% 80px;max-width:2000px;margin:0 auto;width:100%;}
+.product-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color 0.2s;display:flex;flex-direction:column;}
+.product-card:hover{border-color:rgba(232,255,0,0.3);}
+.product-card.sold-out{opacity:0.6;}
+.product-img{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:var(--surface2);position:relative;overflow:hidden;}
+.product-img img{width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;padding:12px;}
+.product-img .img-icon{font-size:64px;position:relative;z-index:1;}
+.product-img img.loaded + .img-icon{display:none;}
+.sold-out-badge{position:absolute;top:12px;right:12px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;z-index:2;}
+.new-badge{position:absolute;top:12px;right:12px;background:var(--accent);color:#000;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;z-index:2;}
+.fulfillment-badge{position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.7);color:var(--gray);font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:0.06em;z-index:2;}
+.product-body{padding:20px;flex:1;display:flex;flex-direction:column;}
+.product-category{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;}
+.product-name{font-size:16px;font-weight:700;margin-bottom:8px;}
+.product-desc{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:16px;flex:1;}
+.price-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.price-elmt{font-size:18px;font-weight:800;color:var(--accent);}
+.price-usd{font-size:12px;color:var(--gray);margin-top:2px;}
+.payment-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;}
+.chip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid var(--border);color:var(--gray);}
+.qty-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.qty-label{font-size:12px;color:var(--gray);}
+.qty-controls{display:flex;align-items:center;gap:6px;margin-left:auto;}
+.qty-btn{width:26px;height:26px;background:var(--surface2);border:1px solid var(--border);color:var(--white);border-radius:6px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:border-color 0.2s;}
+.qty-btn:hover{border-color:var(--accent);}
+.qty-val{font-size:14px;font-weight:700;min-width:20px;text-align:center;}
+.add-btn{width:100%;background:#000;color:var(--white);border:1px solid var(--accent);padding:12px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.add-btn:hover{background:var(--accent);color:#000;transform:translateY(-1px);}
+.add-btn:disabled{background:var(--border);color:var(--gray);border-color:var(--border);cursor:not-allowed;transform:none;}
+.cart-drawer{position:fixed;right:-460px;top:0;width:460px;height:100vh;background:#131313;border-left:1px solid var(--border);z-index:200;transition:right 0.3s;display:flex;flex-direction:column;}
+.cart-drawer.open{right:0;}
+.cart-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cart-header h3{font-size:16px;font-weight:700;}
+.close-btn{background:none;border:none;color:var(--gray);font-size:20px;cursor:pointer;padding:4px;}
+.close-btn:hover{color:var(--white);}
+.cart-items{flex:1;overflow-y:auto;padding:16px 24px;}
+.cart-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.cart-item-icon{width:48px;height:48px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden;}
+.cart-item-icon img{width:100%;height:100%;object-fit:cover;}
+.cart-item-info{flex:1;}
+.cart-item-name{font-size:14px;font-weight:600;margin-bottom:4px;}
+.cart-item-price{font-size:13px;color:var(--accent);}
+.cart-item-qty{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.cart-qty-btn{width:22px;height:22px;background:var(--surface2);border:1px solid var(--border);color:var(--white);border-radius:4px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.cart-qty-btn:hover{border-color:var(--accent);}
+.cart-qty-val{font-size:13px;font-weight:600;min-width:16px;text-align:center;}
+.remove-item{background:none;border:none;color:var(--gray);cursor:pointer;font-size:18px;padding:4px;}
+.remove-item:hover{color:var(--danger);}
+.cart-empty{text-align:center;padding:60px 24px;color:var(--gray);}
+.cart-empty p{margin-top:12px;font-size:14px;}
+.cart-footer{padding:20px 24px;border-top:1px solid var(--border);}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:4px;font-weight:700;}
+.cart-total span:last-child{color:var(--accent);}
+.cart-total-usd{display:flex;justify-content:space-between;margin-bottom:16px;}
+.cart-total-usd span:last-child{color:var(--gray);font-size:13px;}
+.email-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--white);padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:'Inter',sans-serif;}
+.email-input:focus{outline:none;border-color:var(--accent);}
+.email-input::placeholder{color:var(--gray);}
+.payment-select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--white);padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:12px;cursor:pointer;font-family:'Inter',sans-serif;}
+.checkout-btn{width:100%;background:var(--white);color:#000;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.checkout-btn:hover{background:var(--accent);color:#000;transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,255,0,0.3);}
+.checkout-btn:disabled{background:var(--border);color:var(--gray);cursor:not-allowed;transform:none;box-shadow:none;}
+.wallet-info{font-size:11px;color:var(--gray);text-align:center;margin-top:8px;}
+/* Order Confirmation Modal */
+.confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
+.confirm-modal.show{display:flex;}
+.confirm-box{background:#141414;border:1px solid var(--border);border-radius:20px;padding:40px;max-width:500px;width:100%;text-align:center;position:relative;}
+.confirm-icon{width:64px;height:64px;background:rgba(232,255,0,0.1);border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;}
+.confirm-box h2{font-size:22px;font-weight:800;margin-bottom:8px;}
+.confirm-box p{color:var(--gray);font-size:14px;margin-bottom:24px;line-height:1.6;}
+.confirm-order-id{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:12px;color:var(--gray);margin-bottom:12px;}
+.confirm-order-id span{color:var(--white);font-family:monospace;}
+.confirm-tx{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:20px;text-align:left;}
+.confirm-tx p{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+.confirm-tx a{color:var(--accent);font-size:11px;font-family:monospace;word-break:break-all;text-decoration:none;}
+.confirm-tx a:hover{text-decoration:underline;}
+.confirm-items{text-align:left;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+.confirm-item{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+.confirm-item:last-child{border-bottom:none;}
+.confirm-item span:last-child{color:var(--accent);font-weight:700;}
+.confirm-close-btn{width:100%;background:var(--accent);color:#000;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.confirm-close-btn:hover{background:#f5ff40;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;display:none;}
+.overlay.show{display:block;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--accent);color:var(--white);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;z-index:500;transition:transform 0.3s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.footer-link{color:var(--gray);font-size:12px;text-decoration:none;transition:color 0.2s;}
+.footer-link:hover{color:var(--accent);}
+@media(max-width:1600px){.products{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:1100px){.products{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:768px){.products{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){
+  .products{grid-template-columns:1fr;}
+  .cart-drawer{width:100%;}
+}
+</style>
 </head>
 <body>
 
-    <nav>
-        <div class="nav-logo">
-            <img src="https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png" alt="ELMT" style="width:32px;height:32px;object-fit:contain;border-radius:50%;"/>
-            <div class="nav-title">
-                ELMT
-                <span>.store</span>
-            </div>
-        </div>
-        <div class="nav-right">
-            <button class="cart-btn" onclick="toggleCart()">
+<nav>
+  <div class="nav-logo">
+    <img src="https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png" alt="ELMT" style="width:32px;height:32px;object-fit:contain;border-radius:50%;"/>
+    <div class="nav-title">ELMT<span>.store</span></div>
+  </div>
+  <div class="nav-right">
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 Cart
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</nav>
 
-                      🛒 Cart
-                      
-                <span class="cart-count" id="cartCount">0</span>
-            </button>
-            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
-        </div>
-    </nav>
+<div class="hero">
+  <h1>The Official <span>ELMT</span> Store</h1>
+  <p>Purchase Element United products with ELMT, ETH, USDC, USDT, or fiat.</p>
+</div>
 
-    <div class="hero">
-        <h1>
-            The Official 
-            <span>ELMT</span>
-             Store
-        </h1>
-        <p>Purchase Element United products with ELMT, ETH, USDC, USDT, or fiat.</p>
+<div style="text-align:center;padding:0 5% 24px;">
+  <span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:600;color:var(--gray);">
+    <span style="width:6px;height:6px;background:var(--accent);border-radius:50%;display:inline-block;"></span>
+    LIVE ELMT RATE &nbsp;<span id="elmtRate" style="color:var(--white);">Loading...</span>
+    &nbsp;·&nbsp; <a href="https://www.coingecko.com/en/coins/element-2" target="_blank" style="color:var(--gray);text-decoration:none;">via CoinGecko</a>
+  </span>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterProducts('all',this)">All Products</button>
+  <button class="filter-btn" onclick="filterProducts('nft',this)">NFTs</button>
+  <button class="filter-btn" onclick="filterProducts('membership',this)">Membership</button>
+  <button class="filter-btn" onclick="filterProducts('collectible',this)">Collectibles</button>
+  <button class="filter-btn" onclick="filterProducts('swag',this)">Swag</button>
+</div>
+
+<div class="products" id="productsGrid"></div>
+
+<div class="overlay" id="overlay" onclick="toggleCart()"></div>
+
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div style="font-size:40px;">🛒</div>
+      <p>Your cart is empty</p>
     </div>
-
-    <div style="text-align:center;padding:0 5% 24px;">
-        <span style="display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:600;color:var(--gray);">
-            <span style="width:6px;height:6px;background:var(--accent);border-radius:50%;display:inline-block;"></span>
-
-                LIVE ELMT RATE &nbsp;
-            <span id="elmtRate" style="color:var(--white);">Loading...</span>
-
-                &nbsp;·&nbsp; 
-            <a href="https://www.coingecko.com/en/coins/element-2" target="_blank" style="color:var(--gray);text-decoration:none;">via CoinGecko</a>
-        </span>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cartTotalELMT">0 ELMT</span>
     </div>
-
-    <div class="filter-bar">
-        <button class="filter-btn active" onclick="filterProducts('all',this)">All Products</button>
-        <button class="filter-btn" onclick="filterProducts('nft',this)">NFTs</button>
-        <button class="filter-btn" onclick="filterProducts('membership',this)">Membership</button>
-        <button class="filter-btn" onclick="filterProducts('collectible',this)">Collectibles</button>
-        <button class="filter-btn" onclick="filterProducts('swag',this)">Swag</button>
+    <div class="cart-total-usd">
+      <span style="font-size:13px;color:var(--gray);">USD Estimate</span>
+      <span id="cartTotalUSD">$0.00</span>
     </div>
+    <input class="email-input" type="email" id="customerEmail" placeholder="Your email address (required)"/>
+    <select class="payment-select" id="paymentMethod" onchange="handlePaymentMethodChange()">
+      <option value="elmt">Pay with ELMT</option>
+      <option value="eth">Pay with ETH</option>
+      <option value="usdc">Pay with USDC</option>
+      <option value="usdt">Pay with USDT</option>
+      <option value="fiat">Pay with Card (Stripe)</option>
+    </select>
+    <div id="networkFeeNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;display:none;">⚠️ Paying on Ethereum mainnet will incur higher gas fees. For lower fees, switch your wallet to Base network.</div>
+    <div id="walletRequiredNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;display:none;">Wallet connection required for crypto payments.</div>
+    <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Proceed to Checkout</button>
+    <div class="wallet-info" id="walletInfo"></div>
+  </div>
+</div>
 
-    <div class="products" id="productsGrid"></div>
-
-    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
-
-    <div class="cart-drawer" id="cartDrawer">
-        <div class="cart-header">
-            <h3>Your Cart</h3>
-            <button class="close-btn" onclick="toggleCart()">✕</button>
-        </div>
-        <div class="cart-items" id="cartItems">
-            <div class="cart-empty">
-                <div style="font-size:40px;">🛒</div>
-                <p>Your cart is empty</p>
-            </div>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total</span>
-                <span id="cartTotalELMT">0 ELMT</span>
-            </div>
-            <div class="cart-total-usd">
-                <span style="font-size:13px;color:var(--gray);">USD Estimate</span>
-                <span id="cartTotalUSD">$0.00</span>
-            </div>
-            <input class="email-input" type="email" id="customerEmail" placeholder="Your email address (required)"/>
-            <select class="payment-select" id="paymentMethod" onchange="handlePaymentMethodChange()">
-                <option value="elmt">Pay with ELMT</option>
-                <option value="eth">Pay with ETH</option>
-                <option value="usdc">Pay with USDC</option>
-                <option value="usdt">Pay with USDT</option>
-                <option value="fiat">Pay with Card (Stripe)</option>
-            </select>
-            <div id="networkFeeNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;display:none;">⚠️ Paying on Ethereum mainnet will incur higher gas fees. For lower fees, switch your wallet to Base network.</div>
-            <div id="walletRequiredNote" style="font-size:11px;color:var(--gray);margin-bottom:10px;display:none;">Wallet connection required for crypto payments.</div>
-            <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Proceed to Checkout</button>
-            <div class="wallet-info" id="walletInfo"></div>
-        </div>
+<!-- Order Confirmation Modal -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-icon">✓</div>
+    <h2>Order Confirmed!</h2>
+    <p id="confirmMsg">Your transaction was successful. A confirmation email has been sent to you.</p>
+    <div class="confirm-order-id">Order ID: <span id="confirmOrderId"></span></div>
+    <div class="confirm-tx" id="confirmTxSection" style="display:none;">
+      <p>Transaction Hash</p>
+      <a id="confirmTxLink" href="#" target="_blank"></a>
     </div>
+    <div class="confirm-items" id="confirmItems"></div>
+    <button class="confirm-close-btn" onclick="closeConfirmModal()">Continue Shopping</button>
+  </div>
+</div>
 
-    <!-- Order Confirmation Modal -->
-    <div class="confirm-modal" id="confirmModal">
-        <div class="confirm-box">
-            <div class="confirm-icon">✓</div>
-            <h2>Order Confirmed!</h2>
-            <p id="confirmMsg">Your transaction was successful. A confirmation email has been sent to you.</p>
-            <div class="confirm-order-id">
-                Order ID: 
-                <span id="confirmOrderId"></span>
-            </div>
-            <div class="confirm-tx" id="confirmTxSection" style="display:none;">
-                <p>Transaction Hash</p>
-                <a id="confirmTxLink" href="#" target="_blank"></a>
-            </div>
-            <div class="confirm-items" id="confirmItems"></div>
-            <button class="confirm-close-btn" onclick="closeConfirmModal()">Continue Shopping</button>
-        </div>
+<div class="toast" id="toast"></div>
+
+<footer style="background:#131313;border-top:1px solid var(--border);padding:40px 5% 32px;margin-top:40px;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:24px;">
+    <svg style="height:36px;width:auto;" viewBox="0 0 2448 612" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><style>.cls-1{fill:#fff}.cls-2,.cls-3{fill:#e8ff00}.cls-3{opacity:.66}</style></defs>
+      <g><path class="cls-2" d="m493.45,146.19l-89.16-51.14c-59.8-36.19-68.52-42.91-109.3-20.19l-8.91,5.18c-.14.09-.3.18-.44.27-15.04,8.77-40.7,24.16-54.43,32.42-5.37,3.19-8.92,5.29-9.19,5.45-8.74,5.05-43.67,24.48-51.73,28.91-12.21,6.73-21.98,12.22-29.78,17.29-38.8,25.2-29.12,40.1-29.12,145.42,0,30.43-.81,53.32-1.02,71.08-.77,57.41,4.32,61.42,61.74,92.88l88.79,50.93c59.8,36.19,68.52,42.91,109.3,20.19l8.91-5.18c.14-.09.3-.18.44-.27,15.04-8.77,40.7-24.16,54.43-32.42,5.37-3.19,8.92-5.29,9.19-5.45,8.74-5.05,43.67-24.48,51.73-28.91,9.8-5.4,26.55-14.39,29.9-17.37,3.07-2.72,4.86-6.79,4.86-11.21,0,0,0,0,0-.01s0,0,0-.01c0-8.47-6.84-15.35-15.3-15.4-.04,0-.07,0-.11,0-3.03,0-5.85.88-8.24,2.39-.65.41-22.91,14.43-32.87,19.92-6.98,3.84-37.26,20.68-44.83,25.06-.23.13-3.31,1.96-7.96,4.72-11.89,7.15-34.14,20.49-47.17,28.09-.13.08-.26.16-.38.23l-7.72,4.49c-35.35,19.7-42.9,13.86-94.73-17.5l-76.95-44.14c-49.76-27.26-54.17-30.74-53.51-80.5.18-15.4.88-35.23.88-61.61,0-91.28-8.39-104.19,25.24-126.03,6.76-4.39,15.23-9.15,25.81-14.98,6.98-3.84,37.26-20.68,44.83-25.06.23-.13,3.31-1.96,7.96-4.72,11.89-7.15,34.14-20.49,47.17-28.09.13-.08.26-.16.38-.23l7.72-4.49c35.35-19.69,42.9-13.86,94.73,17.5l77.28,44.32c49.89,27.36,53.92,30.82,53.17,81.73-.12,8.67-.38,18.71-.59,30.49-.14,8.05-6.7,14.5-14.75,14.5h0c-8.26,0-14.92-6.78-14.75-15.04.15-7.8.32-14.63.4-20.68.64-43.06-2.77-45.99-44.97-69.13l-65.36-37.49c-43.84-26.53-50.23-31.46-80.13-14.8l-6.53,3.8c-.11.06-.22.13-.32.19-11.03,6.43-29.84,17.71-39.9,23.76-3.94,2.34-6.54,3.88-6.74,3.99-6.41,3.7-32.01,17.94-37.92,21.19-8.95,4.93-16.11,8.96-21.83,12.67-28.44,18.47-21.35,29.4-21.35,106.6,0,22.31-.59,39.09-.75,52.11-.57,42.08,3.17,45.03,45.26,68.09l65.09,37.33c43.84,26.53,50.23,31.46,80.13,14.8l6.53-3.8c.11-.06.22-.13.32-.19,11.03-6.43,29.84-17.71,39.9-23.76,3.94-2.34,6.54-3.88,6.74-3.99,6.41-3.7,32.01-17.94,37.92-21.19,4.81-2.65,9.11-5.04,12.94-7.26.98-.57,1.92-1.12,2.84-1.67,3.81-2.84,6.25-7.43,6.11-12.58-.21-8.27-7.19-14.93-15.46-14.78-2.83.05-5.47.88-7.71,2.28-.39.27-13.56,8.32-20.44,12.11-4.82,2.65-25.73,14.28-30.96,17.3-.16.09-2.28,1.35-5.5,3.26-8.21,4.94-23.57,14.15-32.58,19.4-.09.05-.18.11-.26.16l-5.33,3.1c-24.41,13.6-29.63,9.57-65.42-12.08l-53.14-30.48c-34.36-18.83-37.41-21.23-36.95-55.59.13-10.63.61-24.33.61-42.54,0-63.03-5.79-71.95,17.43-87.03,4.67-3.03,10.52-6.32,17.83-10.35,4.82-2.65,25.73-14.28,30.96-17.3.16-.09,2.28-1.35,5.5-3.26,8.21-4.94,23.57-14.15,32.58-19.4.09-.05.18-.11.27-.16l5.33-3.1c24.41-13.6,29.63-9.57,65.42,12.08l53.36,30.61c34.45,18.89,37.24,21.28,36.72,56.44-.05,3.61-.14,7.58-.23,11.94-.17,8.03-6.72,14.44-14.75,14.44h-.05c-8.25,0-14.9-6.76-14.75-15,.01-.71.02-1.41.03-2.09.41-27.29-1.76-29.14-28.5-43.81l-41.42-23.76c-27.78-16.81-31.83-19.94-50.78-9.38l-4.14,2.41c-.07.04-.14.08-.21.12-6.99,4.08-18.91,11.23-25.29,15.06-2.5,1.48-4.14,2.46-4.27,2.53-4.06,2.35-20.29,11.37-24.03,13.43-5.67,3.13-10.21,5.68-13.84,8.03-18.03,11.71-13.53,18.63-13.53,67.56,0,14.14-.38,24.77-.47,33.03-.36,26.67,2.01,28.54,28.68,43.15l41.25,23.66c27.78,16.81,31.83,19.94,50.78,9.38l4.14-2.41c.07-.04.14-.08.21-.12,6.99-4.08,18.91-11.23,25.29-15.06,2.5-1.48,4.14-2.46,4.27-2.53,4.02-2.32,19.96-11.19,23.91-13.36.04-.02,1.78-.98,2.57-1.42,3.91-2.69,6.47-7.19,6.47-12.29,0-4.75-2.22-8.98-5.68-11.71l-.69-.51c-.11-.08-.23-.17-.35-.24l-.3-.19c-.12-.07-.23-.14-.35-.21l-.85-.47c-2.01-1.01-4.29-1.59-6.7-1.59-1.97,0-3.85.39-5.57,1.08,0,0-.43.07-10.14,5.71-2.63,1.53-14.22,7.89-17.11,9.56-.09.05-1.26.75-3.04,1.8-4.54,2.73-13.03,7.82-18,10.72-.05.03-.1.06-.15.09l-2.95,1.71c-13.49,7.52-16.38,5.29-36.16-6.68l-29.37-16.85c-18.99-10.41-20.68-11.73-20.42-30.73.07-5.88.34-13.45.34-23.51,0-34.84-3.2-39.77,9.63-48.1,2.58-1.68,5.81-3.49,9.85-5.72,2.66-1.47,14.22-7.89,17.11-9.56.09-.05,1.26-.75,3.04-1.8,4.54-2.73,13.03-7.82,18-10.72.05-.03.1-.06.15-.09l2.95-1.71c13.49-7.52,16.38-5.29,36.16,6.68l29.5,16.92c19.04,10.44,20.58,11.76,20.29,31.19,0,.02,0,.05,0,.07-.06,4.29-3.56,7.74-7.86,7.74h-38.6c-5.28-9.39-15.29-15.77-26.8-15.89-16.93-.18-31.05,13.44-31.45,30.37-.41,17.53,13.67,31.87,31.11,31.87,11.03,0,20.71-5.74,26.24-14.4.37-.58.73-1.17,1.06-1.77h180.5c7.21,0,13.1-5.64,13.5-12.75.01-.26.02-.52.02-.78v-10.8c.13-24.95.76-44.46.97-60.09.87-58.74-3.78-62.73-61.35-94.3Z"/><path class="cls-3" d="m467.23,420.26c-.92.55-1.86,1.1-2.84,1.67"/></g>
+      <g><path class="cls-1" d="m700.42,259.42v40.84c0,1,.62,1.5,1.87,1.5h106.77c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v37.46c0,4.75-2.38,7.12-7.12,7.12h-106.77c-1.25,0-1.87.63-1.87,1.87v40.46c0,1.25.62,1.87,1.87,1.87h125.5c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v46.83c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-142.73c-2,0-4.25-.24-6.74-.75-2.5-.5-4.63-1.25-6.37-2.25l-34.47-34.47c-1-1.74-1.75-3.87-2.25-6.37-.5-2.49-.75-4.74-.75-6.74v-161.09c0-2,.24-4.24.75-6.74.5-2.49,1.25-4.62,2.25-6.37l34.47-34.47c1.75-.75,3.87-1.43,6.37-2.06,2.49-.62,4.74-.94,6.74-.94h142.73c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v47.2c0,2-.69,3.62-2.06,4.87-1.38,1.25-3.06,1.87-5.06,1.87h-125.5c-1.25,0-1.87.63-1.87,1.87Z"/><path class="cls-1" d="m1048.45,395.03c2,0,3.62.69,4.87,2.06,1.25,1.38,1.87,3.06,1.87,5.06v49.45c0,2-.63,3.69-1.87,5.06-1.25,1.38-2.87,2.06-4.87,2.06h-161.84c-4.75,0-7.12-2.37-7.12-7.12v-248.01c0-4.74,2.37-7.12,7.12-7.12h51.7c4.74,0,7.12,2.38,7.12,7.12v184.7c0,2,.68,3.62,2.06,4.87,1.37,1.25,3.06,1.87,5.06,1.87h95.91Z"/><path class="cls-1" d="m1149.22,259.42v40.84c0,1,.62,1.5,1.87,1.5h106.77c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v37.46c0,4.75-2.38,7.12-7.12,7.12h-106.77c-1.25,0-1.87.63-1.87,1.87v40.46c0,1.25.62,1.87,1.87,1.87h125.5c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v46.83c0,2-.69,3.69-2.06,5.06s-3.06,2.06-5.06,2.06h-142.73c-2,0-4.25-.24-6.74-.75-2.5-.5-4.63-1.25-6.37-2.25l-34.47-34.47c-1-1.74-1.75-3.87-2.25-6.37-.5-2.49-.75-4.74-.75-6.74v-161.09c0-2,.24-4.24.75-6.74.5-2.49,1.25-4.62,2.25-6.37l34.47-34.47c1.75-.75,3.87-1.43,6.37-2.06,2.49-.62,4.74-.94,6.74-.94h142.73c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v47.2c0,2-.69,3.62-2.06,4.87-1.38,1.25-3.06,1.87-5.06,1.87h-125.5c-1.25,0-1.87.63-1.87,1.87Z"/><path class="cls-1" d="m1604.22,240.31c.62,2.5.94,4.75.94,6.74v204.55c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-52.07c-2,0-3.62-.68-4.87-2.06-1.25-1.37-1.87-3.06-1.87-5.06v-191.44h-41.96v191.44c0,2-.63,3.69-1.87,5.06-1.25,1.38-2.87,2.06-4.87,2.06h-47.2c-2,0-3.69-.68-5.06-2.06-1.38-1.37-2.06-3.06-2.06-5.06v-191.44h-41.96v191.44c0,4.75-2.38,7.12-7.12,7.12h-51.7c-4.75,0-7.12-2.37-7.12-7.12v-248.01c0-2,.68-3.68,2.06-5.06,1.37-1.37,3.06-2.06,5.06-2.06h218.79c2,0,4.31.31,6.93.94,2.62.63,4.8,1.31,6.55,2.06l34.47,34.47c.75,1.75,1.43,3.87,2.06,6.37Z"/><path class="cls-1" d="m1714.16,259.42v40.84c0,1,.62,1.5,1.87,1.5h106.77c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v37.46c0,4.75-2.38,7.12-7.12,7.12h-106.77c-1.25,0-1.87.63-1.87,1.87v40.46c0,1.25.62,1.87,1.87,1.87h125.5c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v46.83c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-142.73c-2,0-4.25-.24-6.74-.75-2.5-.5-4.63-1.25-6.37-2.25l-34.47-34.47c-1-1.74-1.75-3.87-2.25-6.37-.5-2.49-.75-4.74-.75-6.74v-161.09c0-2,.24-4.24.75-6.74.5-2.49,1.25-4.62,2.25-6.37l34.47-34.47c1.75-.75,3.87-1.43,6.37-2.06,2.49-.62,4.74-.94,6.74-.94h142.73c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v47.2c0,2-.69,3.62-2.06,4.87-1.38,1.25-3.06,1.87-5.06,1.87h-125.5c-1.25,0-1.87.63-1.87,1.87Z"/><path class="cls-1" d="m2112.59,240.31c.62,2.5.94,4.75.94,6.74v204.55c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-52.07c-2,0-3.69-.68-5.06-2.06-1.37-1.37-2.06-3.06-2.06-5.06v-184.69c0-2-.63-3.62-1.87-4.87-1.25-1.25-2.87-1.87-4.87-1.87h-74.18c-2,0-3.69.63-5.06,1.87-1.38,1.25-2.06,2.87-2.06,4.87v184.69c0,4.75-2.38,7.12-7.12,7.12h-51.7c-4.75,0-7.12-2.37-7.12-7.12v-248.01c0-2,.68-3.68,2.06-5.06,1.37-1.37,3.06-2.06,5.06-2.06h162.22c2,0,4.31.31,6.93.94,2.62.63,4.81,1.31,6.56,2.06l34.47,34.47c.75,1.75,1.43,3.87,2.06,6.37Z"/><path class="cls-1" d="m2343.17,253.05c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-53.2c-2,0-3.69.63-5.06,1.87-1.38,1.25-2.06,2.87-2.06,4.87v184.69c0,2-.63,3.69-1.87,5.06-1.25,1.38-2.87,2.06-4.87,2.06h-52.07c-2,0-3.69-.68-5.06-2.06-1.38-1.37-2.06-3.06-2.06-5.06v-184.69c0-2-.63-3.62-1.87-4.87-1.25-1.25-2.87-1.87-4.87-1.87h-53.2c-2,0-3.69-.69-5.06-2.06-1.38-1.37-2.06-3.06-2.06-5.06v-49.45c0-4.74,2.37-7.12,7.12-7.12h186.19c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v49.45Z"/></g>
+    </svg>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;">
+      <a href="https://www.elementunited.earth/privacy-policy" target="_blank" class="footer-link">Privacy Policy</a>
+      <a href="https://www.elementunited.earth/disclaimers" target="_blank" class="footer-link">Disclaimer</a>
+      <a href="https://www.elementunited.earth/terms-and-conditions" target="_blank" class="footer-link">Terms &amp; Conditions</a>
     </div>
+    <p style="color:var(--gray);font-size:12px;text-align:center;line-height:1.6;">2000 W Ashton Blvd, Lehi, UT 84043. For questions, contact us at <a href="mailto:support@elementunited.com" style="color:var(--accent);text-decoration:none;">support@elementunited.com</a></p>
+    <p style="color:var(--gray);font-size:11px;">© 2026 Element United. All rights reserved.</p>
+  </div>
+</footer>
 
-    <div class="toast" id="toast"></div>
+<script>
+const ELEMENT_WALLET = '0xC42E590c134416fC601731F8E682a68B13c8CF75';
+const ELMT_CONTRACT = '0x600d601d8b9eb5de5ac90fefc68d0d08801bfd3f';
+const USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const USDT_CONTRACT = '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2';
+const BASE_CHAIN_ID = '0x2105';
+const ERC20_ABI = [
+  {"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+  {"inputs":[{"name":"_owner","type":"address"}],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"stateMutability":"view","type":"function"}
+];
 
-    <footer style="background:#131313;border-top:1px solid var(--border);padding:40px 5% 32px;margin-top:40px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:24px;">
-            <svg style="height:36px;width:auto;" viewBox="0 0 2448 612" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <style>
-                    .cls-1 {
-                        fill:#fff
-                    }
+let elmtPriceUSD = 0.0001932;
+let walletAddress = null;
+let cart = [];
 
-                    .cls-2, .cls-3 {
-                        fill:#e8ff00
-                    }
+// Product quantity state
+const productQty = {};
 
-                    .cls-3 {
-                        opacity: .66
-                    }
-                    </style>
-                </defs>
-                <g>
-                    <path class="cls-2" d="m493.45,146.19l-89.16-51.14c-59.8-36.19-68.52-42.91-109.3-20.19l-8.91,5.18c-.14.09-.3.18-.44.27-15.04,8.77-40.7,24.16-54.43,32.42-5.37,3.19-8.92,5.29-9.19,5.45-8.74,5.05-43.67,24.48-51.73,28.91-12.21,6.73-21.98,12.22-29.78,17.29-38.8,25.2-29.12,40.1-29.12,145.42,0,30.43-.81,53.32-1.02,71.08-.77,57.41,4.32,61.42,61.74,92.88l88.79,50.93c59.8,36.19,68.52,42.91,109.3,20.19l8.91-5.18c.14-.09.3-.18.44-.27,15.04-8.77,40.7-24.16,54.43-32.42,5.37-3.19,8.92-5.29,9.19-5.45,8.74-5.05,43.67-24.48,51.73-28.91,9.8-5.4,26.55-14.39,29.9-17.37,3.07-2.72,4.86-6.79,4.86-11.21,0,0,0,0,0-.01s0,0,0-.01c0-8.47-6.84-15.35-15.3-15.4-.04,0-.07,0-.11,0-3.03,0-5.85.88-8.24,2.39-.65.41-22.91,14.43-32.87,19.92-6.98,3.84-37.26,20.68-44.83,25.06-.23.13-3.31,1.96-7.96,4.72-11.89,7.15-34.14,20.49-47.17,28.09-.13.08-.26.16-.38.23l-7.72,4.49c-35.35,19.7-42.9,13.86-94.73-17.5l-76.95-44.14c-49.76-27.26-54.17-30.74-53.51-80.5.18-15.4.88-35.23.88-61.61,0-91.28-8.39-104.19,25.24-126.03,6.76-4.39,15.23-9.15,25.81-14.98,6.98-3.84,37.26-20.68,44.83-25.06.23-.13,3.31-1.96,7.96-4.72,11.89-7.15,34.14-20.49,47.17-28.09.13-.08.26-.16.38-.23l7.72-4.49c35.35-19.69,42.9-13.86,94.73,17.5l77.28,44.32c49.89,27.36,53.92,30.82,53.17,81.73-.12,8.67-.38,18.71-.59,30.49-.14,8.05-6.7,14.5-14.75,14.5h0c-8.26,0-14.92-6.78-14.75-15.04.15-7.8.32-14.63.4-20.68.64-43.06-2.77-45.99-44.97-69.13l-65.36-37.49c-43.84-26.53-50.23-31.46-80.13-14.8l-6.53,3.8c-.11.06-.22.13-.32.19-11.03,6.43-29.84,17.71-39.9,23.76-3.94,2.34-6.54,3.88-6.74,3.99-6.41,3.7-32.01,17.94-37.92,21.19-8.95,4.93-16.11,8.96-21.83,12.67-28.44,18.47-21.35,29.4-21.35,106.6,0,22.31-.59,39.09-.75,52.11-.57,42.08,3.17,45.03,45.26,68.09l65.09,37.33c43.84,26.53,50.23,31.46,80.13,14.8l6.53-3.8c.11-.06.22-.13.32-.19,11.03-6.43,29.84-17.71,39.9-23.76,3.94-2.34,6.54-3.88,6.74-3.99,6.41-3.7,32.01-17.94,37.92-21.19,4.81-2.65,9.11-5.04,12.94-7.26.98-.57,1.92-1.12,2.84-1.67,3.81-2.84,6.25-7.43,6.11-12.58-.21-8.27-7.19-14.93-15.46-14.78-2.83.05-5.47.88-7.71,2.28-.39.27-13.56,8.32-20.44,12.11-4.82,2.65-25.73,14.28-30.96,17.3-.16.09-2.28,1.35-5.5,3.26-8.21,4.94-23.57,14.15-32.58,19.4-.09.05-.18.11-.26.16l-5.33,3.1c-24.41,13.6-29.63,9.57-65.42-12.08l-53.14-30.48c-34.36-18.83-37.41-21.23-36.95-55.59.13-10.63.61-24.33.61-42.54,0-63.03-5.79-71.95,17.43-87.03,4.67-3.03,10.52-6.32,17.83-10.35,4.82-2.65,25.73-14.28,30.96-17.3.16-.09,2.28-1.35,5.5-3.26,8.21-4.94,23.57-14.15,32.58-19.4.09-.05.18-.11.27-.16l5.33-3.1c24.41-13.6,29.63-9.57,65.42,12.08l53.36,30.61c34.45,18.89,37.24,21.28,36.72,56.44-.05,3.61-.14,7.58-.23,11.94-.17,8.03-6.72,14.44-14.75,14.44h-.05c-8.25,0-14.9-6.76-14.75-15,.01-.71.02-1.41.03-2.09.41-27.29-1.76-29.14-28.5-43.81l-41.42-23.76c-27.78-16.81-31.83-19.94-50.78-9.38l-4.14,2.41c-.07.04-.14.08-.21.12-6.99,4.08-18.91,11.23-25.29,15.06-2.5,1.48-4.14,2.46-4.27,2.53-4.06,2.35-20.29,11.37-24.03,13.43-5.67,3.13-10.21,5.68-13.84,8.03-18.03,11.71-13.53,18.63-13.53,67.56,0,14.14-.38,24.77-.47,33.03-.36,26.67,2.01,28.54,28.68,43.15l41.25,23.66c27.78,16.81,31.83,19.94,50.78,9.38l4.14-2.41c.07-.04.14-.08.21-.12,6.99-4.08,18.91-11.23,25.29-15.06,2.5-1.48,4.14-2.46,4.27-2.53,4.02-2.32,19.96-11.19,23.91-13.36.04-.02,1.78-.98,2.57-1.42,3.91-2.69,6.47-7.19,6.47-12.29,0-4.75-2.22-8.98-5.68-11.71l-.69-.51c-.11-.08-.23-.17-.35-.24l-.3-.19c-.12-.07-.23-.14-.35-.21l-.85-.47c-2.01-1.01-4.29-1.59-6.7-1.59-1.97,0-3.85.39-5.57,1.08,0,0-.43.07-10.14,5.71-2.63,1.53-14.22,7.89-17.11,9.56-.09.05-1.26.75-3.04,1.8-4.54,2.73-13.03,7.82-18,10.72-.05.03-.1.06-.15.09l-2.95,1.71c-13.49,7.52-16.38,5.29-36.16-6.68l-29.37-16.85c-18.99-10.41-20.68-11.73-20.42-30.73.07-5.88.34-13.45.34-23.51,0-34.84-3.2-39.77,9.63-48.1,2.58-1.68,5.81-3.49,9.85-5.72,2.66-1.47,14.22-7.89,17.11-9.56.09-.05,1.26-.75,3.04-1.8,4.54-2.73,13.03-7.82,18-10.72.05-.03.1-.06.15-.09l2.95-1.71c13.49-7.52,16.38-5.29,36.16,6.68l29.5,16.92c19.04,10.44,20.58,11.76,20.29,31.19,0,.02,0,.05,0,.07-.06,4.29-3.56,7.74-7.86,7.74h-38.6c-5.28-9.39-15.29-15.77-26.8-15.89-16.93-.18-31.05,13.44-31.45,30.37-.41,17.53,13.67,31.87,31.11,31.87,11.03,0,20.71-5.74,26.24-14.4.37-.58.73-1.17,1.06-1.77h180.5c7.21,0,13.1-5.64,13.5-12.75.01-.26.02-.52.02-.78v-10.8c.13-24.95.76-44.46.97-60.09.87-58.74-3.78-62.73-61.35-94.3Z"/>
-                    <path class="cls-3" d="m467.23,420.26c-.92.55-1.86,1.1-2.84,1.67"/>
-                </g>
-                <g>
-                    <path class="cls-1" d="m700.42,259.42v40.84c0,1,.62,1.5,1.87,1.5h106.77c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v37.46c0,4.75-2.38,7.12-7.12,7.12h-106.77c-1.25,0-1.87.63-1.87,1.87v40.46c0,1.25.62,1.87,1.87,1.87h125.5c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v46.83c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-142.73c-2,0-4.25-.24-6.74-.75-2.5-.5-4.63-1.25-6.37-2.25l-34.47-34.47c-1-1.74-1.75-3.87-2.25-6.37-.5-2.49-.75-4.74-.75-6.74v-161.09c0-2,.24-4.24.75-6.74.5-2.49,1.25-4.62,2.25-6.37l34.47-34.47c1.75-.75,3.87-1.43,6.37-2.06,2.49-.62,4.74-.94,6.74-.94h142.73c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v47.2c0,2-.69,3.62-2.06,4.87-1.38,1.25-3.06,1.87-5.06,1.87h-125.5c-1.25,0-1.87.63-1.87,1.87Z"/>
-                    <path class="cls-1" d="m1048.45,395.03c2,0,3.62.69,4.87,2.06,1.25,1.38,1.87,3.06,1.87,5.06v49.45c0,2-.63,3.69-1.87,5.06-1.25,1.38-2.87,2.06-4.87,2.06h-161.84c-4.75,0-7.12-2.37-7.12-7.12v-248.01c0-4.74,2.37-7.12,7.12-7.12h51.7c4.74,0,7.12,2.38,7.12,7.12v184.7c0,2,.68,3.62,2.06,4.87,1.37,1.25,3.06,1.87,5.06,1.87h95.91Z"/>
-                    <path class="cls-1" d="m1149.22,259.42v40.84c0,1,.62,1.5,1.87,1.5h106.77c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v37.46c0,4.75-2.38,7.12-7.12,7.12h-106.77c-1.25,0-1.87.63-1.87,1.87v40.46c0,1.25.62,1.87,1.87,1.87h125.5c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v46.83c0,2-.69,3.69-2.06,5.06s-3.06,2.06-5.06,2.06h-142.73c-2,0-4.25-.24-6.74-.75-2.5-.5-4.63-1.25-6.37-2.25l-34.47-34.47c-1-1.74-1.75-3.87-2.25-6.37-.5-2.49-.75-4.74-.75-6.74v-161.09c0-2,.24-4.24.75-6.74.5-2.49,1.25-4.62,2.25-6.37l34.47-34.47c1.75-.75,3.87-1.43,6.37-2.06,2.49-.62,4.74-.94,6.74-.94h142.73c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v47.2c0,2-.69,3.62-2.06,4.87-1.38,1.25-3.06,1.87-5.06,1.87h-125.5c-1.25,0-1.87.63-1.87,1.87Z"/>
-                    <path class="cls-1" d="m1604.22,240.31c.62,2.5.94,4.75.94,6.74v204.55c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-52.07c-2,0-3.62-.68-4.87-2.06-1.25-1.37-1.87-3.06-1.87-5.06v-191.44h-41.96v191.44c0,2-.63,3.69-1.87,5.06-1.25,1.38-2.87,2.06-4.87,2.06h-47.2c-2,0-3.69-.68-5.06-2.06-1.38-1.37-2.06-3.06-2.06-5.06v-191.44h-41.96v191.44c0,4.75-2.38,7.12-7.12,7.12h-51.7c-4.75,0-7.12-2.37-7.12-7.12v-248.01c0-2,.68-3.68,2.06-5.06,1.37-1.37,3.06-2.06,5.06-2.06h218.79c2,0,4.31.31,6.93.94,2.62.63,4.8,1.31,6.55,2.06l34.47,34.47c.75,1.75,1.43,3.87,2.06,6.37Z"/>
-                    <path class="cls-1" d="m1714.16,259.42v40.84c0,1,.62,1.5,1.87,1.5h106.77c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v37.46c0,4.75-2.38,7.12-7.12,7.12h-106.77c-1.25,0-1.87.63-1.87,1.87v40.46c0,1.25.62,1.87,1.87,1.87h125.5c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v46.83c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-142.73c-2,0-4.25-.24-6.74-.75-2.5-.5-4.63-1.25-6.37-2.25l-34.47-34.47c-1-1.74-1.75-3.87-2.25-6.37-.5-2.49-.75-4.74-.75-6.74v-161.09c0-2,.24-4.24.75-6.74.5-2.49,1.25-4.62,2.25-6.37l34.47-34.47c1.75-.75,3.87-1.43,6.37-2.06,2.49-.62,4.74-.94,6.74-.94h142.73c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v47.2c0,2-.69,3.62-2.06,4.87-1.38,1.25-3.06,1.87-5.06,1.87h-125.5c-1.25,0-1.87.63-1.87,1.87Z"/>
-                    <path class="cls-1" d="m2112.59,240.31c.62,2.5.94,4.75.94,6.74v204.55c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-52.07c-2,0-3.69-.68-5.06-2.06-1.37-1.37-2.06-3.06-2.06-5.06v-184.69c0-2-.63-3.62-1.87-4.87-1.25-1.25-2.87-1.87-4.87-1.87h-74.18c-2,0-3.69.63-5.06,1.87-1.38,1.25-2.06,2.87-2.06,4.87v184.69c0,4.75-2.38,7.12-7.12,7.12h-51.7c-4.75,0-7.12-2.37-7.12-7.12v-248.01c0-2,.68-3.68,2.06-5.06,1.37-1.37,3.06-2.06,5.06-2.06h162.22c2,0,4.31.31,6.93.94,2.62.63,4.81,1.31,6.56,2.06l34.47,34.47c.75,1.75,1.43,3.87,2.06,6.37Z"/>
-                    <path class="cls-1" d="m2343.17,253.05c0,2-.69,3.69-2.06,5.06-1.38,1.38-3.06,2.06-5.06,2.06h-53.2c-2,0-3.69.63-5.06,1.87-1.38,1.25-2.06,2.87-2.06,4.87v184.69c0,2-.63,3.69-1.87,5.06-1.25,1.38-2.87,2.06-4.87,2.06h-52.07c-2,0-3.69-.68-5.06-2.06-1.38-1.37-2.06-3.06-2.06-5.06v-184.69c0-2-.63-3.62-1.87-4.87-1.25-1.25-2.87-1.87-4.87-1.87h-53.2c-2,0-3.69-.69-5.06-2.06-1.38-1.37-2.06-3.06-2.06-5.06v-49.45c0-4.74,2.37-7.12,7.12-7.12h186.19c2,0,3.68.69,5.06,2.06,1.37,1.38,2.06,3.06,2.06,5.06v49.45Z"/>
-                </g>
-            </svg>
-            <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;">
-                <a href="https://www.elementunited.earth/privacy-policy" target="_blank" class="footer-link">Privacy Policy</a>
-                <a href="https://www.elementunited.earth/disclaimers" target="_blank" class="footer-link">Disclaimer</a>
-                <a href="https://www.elementunited.earth/terms-and-conditions" target="_blank" class="footer-link">Terms &amp; Conditions</a>
-            </div>
-            <p style="color:var(--gray);font-size:12px;text-align:center;line-height:1.6;">
-                2000 W Ashton Blvd, Lehi, UT 84043. For questions, contact us at 
-                <a href="mailto:support@elementunited.com" style="color:var(--accent);text-decoration:none;">support@elementunited.com</a>
-            </p>
-            <p style="color:var(--gray);font-size:11px;">© 2026 Element United. All rights reserved.</p>
+async function fetchELMTPrice() {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/token_price/base?contract_addresses=0x600d601d8b9eb5de5ac90fefc68d0d08801bfd3f&vs_currencies=usd');
+    const data = await res.json();
+    const key = Object.keys(data)[0];
+    if (key && data[key].usd) elmtPriceUSD = data[key].usd;
+  } catch(e) {
+    console.log('Using fallback ELMT price:', elmtPriceUSD);
+  }
+  updateRateIndicator();
+  renderProducts();
+}
+
+function updateRateIndicator() {
+  const el = document.getElementById('elmtRate');
+  if (el) el.textContent = '1 ELMT = $' + elmtPriceUSD.toFixed(7) + ' USD';
+}
+
+function calcELMT(usd) {
+  if (elmtPriceUSD <= 0) return 0;
+  return Math.round(usd / elmtPriceUSD);
+}
+
+function generateOrderId() {
+  return 'EU-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+}
+
+const products = [
+  {
+    id: 1,
+    name: 'Smart Node Boost NFT',
+    category: 'nft',
+    categoryLabel: 'NFT',
+    desc: '2x action points on one Element Smart Node for 6 continuous months. Delivered directly to your Element wallet.',
+    priceUSD: 500,
+    img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Digital%20Card_Smart%20Node%20Boost%20NFT.png',
+    icon: '⚡',
+    soldOut: false,
+    isNew: true,
+    fulfillment: 'Digital',
+    payments: ['ELMT','ETH','USDC','USDT','FIAT'],
+    maxQty: 10
+  },
+  {
+    id: 2,
+    name: 'Heirloom NFT',
+    category: 'nft',
+    categoryLabel: 'NFT',
+    desc: 'A permanent blockchain-secured digital vault for your most treasured possessions. Preserve provenance across generations.',
+    priceUSD: 99,
+    img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Digital%20Card_Heirloom%20NFT_V2.png',
+    icon: '🏛️',
+    soldOut: false,
+    isNew: false,
+    fulfillment: 'Digital',
+    payments: ['ELMT','ETH','USDC','USDT','FIAT'],
+    maxQty: 10
+  },
+  {
+    id: 3,
+    name: 'Element Swag Pack 1',
+    category: 'swag',
+    categoryLabel: 'Swag',
+    desc: 'Official Element United branded merchandise. Ships directly from the Element team.',
+    priceUSD: 35,
+    img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Element%20Swag%20Pack_001.jpg',
+    icon: '👕',
+    soldOut: false,
+    isNew: false,
+    fulfillment: 'Physical',
+    payments: ['ELMT','ETH','USDC','USDT','FIAT'],
+    comingSoon: true,
+    maxQty: 10
+  },
+  {
+    id: 99,
+    name: '$1 Test Product',
+    category: 'swag',
+    categoryLabel: 'Test',
+    desc: 'Internal test product only. Do not purchase.',
+    priceUSD: 1,
+    img: null,
+    icon: '🧪',
+    soldOut: false,
+    isNew: false,
+    fulfillment: 'Digital',
+    payments: ['FIAT'],
+    maxQty: 1
+  },
+  {
+    id: 4,
+    name: 'Element Silver Bullion Coin',
+    category: 'collectible',
+    categoryLabel: 'Collectible',
+    desc: '1 Troy Oz .999 Pure Silver. Element United Logo with "Unearth Possibilities" on the front. Grooved edge. Series A. Issued 2022. 39mm, 31.1g.',
+    priceUSD: 75.55,
+    img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Silver%20Coin_Nov2023.png',
+    icon: '🪙',
+    soldOut: true,
+    isNew: false,
+    fulfillment: 'Physical',
+    payments: ['ELMT','ETH','USDC','USDT','FIAT'],
+    maxQty: 3
+  },
+  {
+    id: 5,
+    name: 'Element Gold Bullion Coin',
+    category: 'collectible',
+    categoryLabel: 'Collectible',
+    desc: '1 Troy Oz .9999 Pure Gold. Element United Logo with "Unearth Possibilities" on the front. Grooved edge. Series A. Issued 2022. 30mm, 31.1g.',
+    priceUSD: 4558.48,
+    img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Gold%20Coin_Feb2025.png',
+    icon: '🥇',
+    soldOut: true,
+    isNew: false,
+    fulfillment: 'Physical',
+    payments: ['ELMT','ETH','USDC','USDT','FIAT'],
+    maxQty: 3
+  }
+];
+
+// Init qty state
+products.forEach(p => { productQty[p.id] = 1; });
+
+function renderProducts(filter = 'all') {
+  const grid = document.getElementById('productsGrid');
+  const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+  grid.innerHTML = filtered.map(p => {
+    const qty = productQty[p.id] || 1;
+    const imgHtml = p.img ? `<img src="${p.img}" alt="${p.name}" onload="this.classList.add('loaded')" onerror="this.style.display='none'"/>` : '';
+    const elmtPrice = p.soldOut && p.category === 'collectible' ? '$' + p.priceUSD.toLocaleString() + ' USD' : calcELMT(p.priceUSD).toLocaleString() + ' ELMT';
+    const usdLabel = p.soldOut && p.category === 'collectible' ? 'Spot price at time of sale' : '≈ $' + p.priceUSD.toLocaleString() + ' USD';
+    return `
+    <div class="product-card${p.soldOut ? ' sold-out' : ''}">
+      <div class="product-img">
+        ${imgHtml}
+        <div class="img-icon">${p.icon}</div>
+        ${p.soldOut ? '<span class="sold-out-badge">Sold Out</span>' : ''}
+        ${p.isNew && !p.soldOut ? '<span class="new-badge">New</span>' : ''}
+        <span class="fulfillment-badge">${p.fulfillment}</span>
+      </div>
+      <div class="product-body">
+        <div class="product-category">${p.categoryLabel}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="price-row">
+          <div>
+            <div class="price-elmt">${elmtPrice}</div>
+            <div class="price-usd">${usdLabel}</div>
+          </div>
         </div>
-    </footer>
+        <div class="payment-chips">${p.payments.map(pay => `<span class="chip">${pay}</span>`).join('')}</div>
+        ${!p.soldOut && !p.comingSoon ? `
+        <div class="qty-row">
+          <span class="qty-label">Qty</span>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(${p.id},-1)">-</button>
+            <span class="qty-val" id="qty-${p.id}">${qty}</span>
+            <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+            <span style="font-size:11px;color:var(--gray);margin-left:4px;">max ${p.maxQty}</span>
+          </div>
+        </div>` : ''}
+        <button class="add-btn" ${p.soldOut || p.comingSoon ? 'disabled' : ''} onclick="addToCart(${p.id})">
+          ${p.soldOut ? 'Sold Out' : p.comingSoon ? 'Coming Soon' : '+ Add to Cart'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-    <script>
-    const ELEMENT_WALLET = '0xC42E590c134416fC601731F8E682a68B13c8CF75';
-    const ELMT_CONTRACT = '0x600d601d8b9eb5de5ac90fefc68d0d08801bfd3f';
-    const USDC_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-    const USDT_CONTRACT = '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2';
-    const BASE_CHAIN_ID = '0x2105';
-    const ERC20_ABI = [
-    {
-        "inputs": [{
-            "name": "_to",
-            "type": "address"
-        }, {
-            "name": "_value",
-            "type": "uint256"
-        }],
-        "name": "transfer",
-        "outputs": [{
-            "name": "",
-            "type": "bool"
-        }],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "name": "_owner",
-            "type": "address"
-        }],
-        "name": "decimals",
-        "outputs": [{
-            "name": "",
-            "type": "uint8"
-        }],
-        "stateMutability": "view",
-        "type": "function"
+function changeQty(id, delta) {
+  const product = products.find(p => p.id === id);
+  const current = productQty[id] || 1;
+  const newQty = Math.max(1, Math.min(product.maxQty, current + delta));
+  productQty[id] = newQty;
+  const el = document.getElementById('qty-' + id);
+  if (el) el.textContent = newQty;
+}
+
+function filterProducts(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts(filter);
+}
+
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const qty = productQty[id] || 1;
+  const existing = cart.find(i => i.id === id);
+  if (existing) {
+    const newQty = Math.min(product.maxQty, existing.qty + qty);
+    existing.qty = newQty;
+  } else {
+    cart.push({...product, qty});
+  }
+  updateCart();
+  showToast(`${product.name} (x${qty}) added to cart`);
+}
+
+function updateCartQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  const product = products.find(p => p.id === id);
+  item.qty = Math.max(1, Math.min(product.maxQty, item.qty + delta));
+  updateCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  updateCart();
+}
+
+function updateCart() {
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+  const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0);
+  const totalELMT = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
+  document.getElementById('cartTotalELMT').textContent = totalELMT.toLocaleString() + ' ELMT';
+  document.getElementById('cartTotalUSD').textContent = '$' + totalUSD.toFixed(2);
+  const itemsEl = document.getElementById('cartItems');
+  if (cart.length === 0) {
+    itemsEl.innerHTML = '<div class="cart-empty"><div style="font-size:40px;">🛒</div><p>Your cart is empty</p></div>';
+  } else {
+    itemsEl.innerHTML = cart.map(i => {
+      const thumbHtml = i.img ? `<img src="${i.img}" alt="${i.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"/>` : i.icon;
+      return `
+      <div class="cart-item">
+        <div class="cart-item-icon">${thumbHtml}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${i.name}</div>
+          <div class="cart-item-price">$${(i.priceUSD * i.qty).toFixed(2)} USD</div>
+          <div class="cart-item-qty">
+            <button class="cart-qty-btn" onclick="updateCartQty(${i.id},-1)">-</button>
+            <span class="cart-qty-val">${i.qty}</span>
+            <button class="cart-qty-btn" onclick="updateCartQty(${i.id},1)">+</button>
+          </div>
+        </div>
+        <button class="remove-item" onclick="removeFromCart(${i.id})">✕</button>
+      </div>`;
+    }).join('');
+  }
+}
+
+function handlePaymentMethodChange() {
+  const method = document.getElementById('paymentMethod').value;
+  const note = document.getElementById('walletRequiredNote');
+  const feeNote = document.getElementById('networkFeeNote');
+  note.style.display = method !== 'fiat' ? 'block' : 'none';
+  // Show Ethereum fee warning if user's wallet is on mainnet
+  if (method !== 'fiat' && window._web3modal) {
+    const chainId = window._web3modal.getChainId ? window._web3modal.getChainId() : null;
+    feeNote.style.display = chainId === 1 ? 'block' : 'none';
+  } else {
+    feeNote.style.display = 'none';
+  }
+}
+
+function toggleCart() {
+  document.getElementById('cartDrawer').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+async function connectWallet() {
+  if (window._w3mConnected && window.walletAddress) {
+    await window._web3modal.disconnect();
+    showToast('Wallet disconnected');
+    return;
+  }
+  window._web3modal.open();
+}
+
+async function sendERC20(contractAddress, toAddress, amount, decimals) {
+  const signer = await window.getEthersSigner();
+  const erc20Abi = ['function transfer(address to, uint256 amount) returns (bool)'];
+  const contract = new ethers.Contract(contractAddress, erc20Abi, signer);
+  const amountBN = ethers.parseUnits(amount.toFixed(decimals), decimals);
+  const tx = await contract.transfer(toAddress, amountBN);
+  return tx.hash;
+}
+
+async function sendETH(toAddress, amountUSD) {
+  const signer = await window.getEthersSigner();
+  const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+  const ethData = await ethPriceRes.json();
+  const ethPrice = ethData.ethereum.usd;
+  const ethAmount = (amountUSD / ethPrice).toFixed(18);
+  const tx = await signer.sendTransaction({
+    to: toAddress,
+    value: ethers.parseEther(ethAmount)
+  });
+  return tx.hash;
+}
+
+async function checkout() {
+  if (cart.length === 0) { showToast('Your cart is empty'); return; }
+
+  const customerEmail = document.getElementById('customerEmail').value.trim();
+  if (!customerEmail || !customerEmail.includes('@')) {
+    showToast('Please enter a valid email address');
+    document.getElementById('customerEmail').focus();
+    return;
+  }
+
+  const method = document.getElementById('paymentMethod').value;
+  const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0);
+  const totalELMT = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
+  const orderId = generateOrderId();
+
+  if (method === 'fiat') {
+    await checkoutStripe(customerEmail, orderId);
+    return;
+  }
+
+  if (!window.walletAddress) {
+    showToast('Please connect your wallet first');
+    return;
+  }
+
+  const btn = document.getElementById('checkoutBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  try {
+    let txHash;
+
+    if (method === 'elmt') {
+      txHash = await sendERC20(ELMT_CONTRACT, ELEMENT_WALLET, totalUSD / elmtPriceUSD, 18);
+    } else if (method === 'eth') {
+      txHash = await sendETH(ELEMENT_WALLET, totalUSD);
+    } else if (method === 'usdc') {
+      txHash = await sendERC20(USDC_CONTRACT, ELEMENT_WALLET, totalUSD, 6);
+    } else if (method === 'usdt') {
+      txHash = await sendERC20(USDT_CONTRACT, ELEMENT_WALLET, totalUSD, 6);
     }
-    ];
 
-    let elmtPriceUSD = 0.0001932;
-    let walletAddress = null;
-    let cart = [];
-
-    // Product quantity state
-    const productQty = {};
-
-    async function fetchELMTPrice() {
-        try {
-            const res = await fetch('https://api.coingecko.com/api/v3/simple/token_price/base?contract_addresses=0x600d601d8b9eb5de5ac90fefc68d0d08801bfd3f&vs_currencies=usd');
-            const data = await res.json();
-            const key = Object.keys(data)[0];
-            if (key && data[key].usd)
-                elmtPriceUSD = data[key].usd;
-        } catch (e) {
-            console.log('Using fallback ELMT price:', elmtPriceUSD);
-        }
-        updateRateIndicator();
-        renderProducts();
-    }
-
-    function updateRateIndicator() {
-        const el = document.getElementById('elmtRate');
-        if (el)
-            el.textContent = '1 ELMT = $' + elmtPriceUSD.toFixed(7) + ' USD';
-    }
-
-    function calcELMT(usd) {
-        if (elmtPriceUSD <= 0)
-            return 0;
-        return Math.round(usd / elmtPriceUSD);
-    }
-
-    function generateOrderId() {
-        return 'EU-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
-    }
-
-    const products = [
-    {
-        id: 1,
-        name: 'Smart Node Boost NFT',
-        category: 'nft',
-        categoryLabel: 'NFT',
-        desc: '2x action points on one Element Smart Node for 6 continuous months. Delivered directly to your Element wallet.',
-        priceUSD: 500,
-        img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Digital%20Card_Smart%20Node%20Boost%20NFT.png',
-        icon: '⚡',
-        soldOut: false,
-        isNew: true,
-        fulfillment: 'Digital',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
-        maxQty: 10
-    },
-    {
-        id: 2,
-        name: 'Heirloom NFT',
-        category: 'nft',
-        categoryLabel: 'NFT',
-        desc: 'A permanent blockchain-secured digital vault for your most treasured possessions. Preserve provenance across generations.',
-        priceUSD: 99,
-        img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Digital%20Card_Heirloom%20NFT_V2.png',
-        icon: '🏛️',
-        soldOut: false,
-        isNew: false,
-        fulfillment: 'Digital',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
-        maxQty: 10
-    },
-    {
-        id: 3,
-        name: 'Element Swag Pack 1',
-        category: 'swag',
-        categoryLabel: 'Swag',
-        desc: 'Official Element United branded merchandise. Ships directly from the Element team.',
-        priceUSD: 35,
-        img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Element%20Swag%20Pack_001.jpg',
-        icon: '👕',
-        soldOut: false,
-        isNew: false,
-        fulfillment: 'Physical',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
-        comingSoon: true,
-        maxQty: 10
-    },
-    {
-        id: 99,
-        name: '$1 Test Product',
-        category: 'swag',
-        categoryLabel: 'Test',
-        desc: 'Internal test product only. Do not purchase.',
-        priceUSD: 1,
-        img: null,
-        icon: '🧪',
-        soldOut: false,
-        isNew: false,
-        fulfillment: 'Digital',
-        payments: ['FIAT'],
-        maxQty: 1
-    },
-    {
-        id: 4,
-        name: 'Element Silver Bullion Coin',
-        category: 'collectible',
-        categoryLabel: 'Collectible',
-        desc: '1 Troy Oz .999 Pure Silver. Element United Logo with "Unearth Possibilities" on the front. Grooved edge. Series A. Issued 2022. 39mm, 31.1g.',
-        priceUSD: 75.55,
-        img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Silver%20Coin_Nov2023.png',
-        icon: '🪙',
-        soldOut: true,
-        isNew: false,
-        fulfillment: 'Physical',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
-        maxQty: 3
-    },
-    {
-        id: 5,
-        name: 'Element Gold Bullion Coin',
-        category: 'collectible',
-        categoryLabel: 'Collectible',
-        desc: '1 Troy Oz .9999 Pure Gold. Element United Logo with "Unearth Possibilities" on the front. Grooved edge. Series A. Issued 2022. 30mm, 31.1g.',
-        priceUSD: 4558.48,
-        img: 'https://raw.githubusercontent.com/Element-Blockchain/images/main/products/Gold%20Coin_Feb2025.png',
-        icon: '🥇',
-        soldOut: true,
-        isNew: false,
-        fulfillment: 'Physical',
-        payments: ['ELMT', 'ETH', 'USDC', 'USDT', 'FIAT'],
-        maxQty: 3
-    }
-    ];
-
-    // Init qty state
-    products.forEach(p => {
-        productQty[p.id] = 1;
+    // Send confirmation emails
+    await fetch('/.netlify/functions/send-confirmation', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        customerEmail,
+        customerName: '',
+        orderId,
+        txHash,
+        paymentMethod: method.toUpperCase(),
+        cart: cart.map(i => ({name: i.name, qty: i.qty, priceUSD: i.priceUSD})),
+        total: totalELMT.toLocaleString() + ' ELMT (≈ $' + totalUSD.toFixed(2) + ' USD)'
+      })
     });
 
-    function renderProducts(filter='all') {
-        const grid = document.getElementById('productsGrid');
-        const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
-        grid.innerHTML = filtered.map(p => {
-            const qty = productQty[p.id] || 1;
-            const imgHtml = p.img ? `<img src="${p.img}" alt="${p.name}" onload="this.classList.add('loaded')" onerror="this.style.display='none'"/>` : '';
-            const elmtPrice = p.soldOut && p.category === 'collectible' ? '$' + p.priceUSD.toLocaleString() + ' USD' : calcELMT(p.priceUSD).toLocaleString() + ' ELMT';
-            const usdLabel = p.soldOut && p.category === 'collectible' ? 'Spot price at time of sale' : '≈ $' + p.priceUSD.toLocaleString() + ' USD';
-            return `
-                <div class="product-card${p.soldOut ? ' sold-out' : ''}">
-                  <div class="product-img">
-                    ${imgHtml}
-                    <div class="img-icon">${p.icon}</div>
-                    ${p.soldOut ? '<span class="sold-out-badge">Sold Out</span>' : ''}
-                    ${p.isNew && !p.soldOut ? '<span class="new-badge">New</span>' : ''}
-                    <span class="fulfillment-badge">${p.fulfillment}</span>
-                  </div>
-                  <div class="product-body">
-                    <div class="product-category">${p.categoryLabel}</div>
-                    <div class="product-name">${p.name}</div>
-                    <div class="product-desc">${p.desc}</div>
-                    <div class="price-row">
-                      <div>
-                        <div class="price-elmt">${elmtPrice}</div>
-                        <div class="price-usd">${usdLabel}</div>
-                      </div>
-                    </div>
-                    <div class="payment-chips">${p.payments.map(pay => `<span class="chip">${pay}</span>`).join('')}</div>
-                    ${!p.soldOut && !p.comingSoon ? `
-                    <div class="qty-row">
-                      <span class="qty-label">Qty</span>
-                      <div class="qty-controls">
-                        <button class="qty-btn" onclick="changeQty(${p.id},-1)">-</button>
-                        <span class="qty-val" id="qty-${p.id}">${qty}</span>
-                        <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
-                        <span style="font-size:11px;color:var(--gray);margin-left:4px;">max ${p.maxQty}</span>
-                      </div>
-                    </div>` : ''}
-                    <button class="add-btn" ${p.soldOut || p.comingSoon ? 'disabled' : ''} onclick="addToCart(${p.id})">
-                      ${p.soldOut ? 'Sold Out' : p.comingSoon ? 'Coming Soon' : '+ Add to Cart'}
-                    </button>
-                  </div>
-                </div>`;
-        }).join('');
-    }
+    showConfirmModal(orderId, txHash, method.toUpperCase(), totalUSD, totalELMT);
+    cart = [];
+    updateCart();
+    toggleCart();
 
-    function changeQty(id, delta) {
-        const product = products.find(p => p.id === id);
-        const current = productQty[id] || 1;
-        const newQty = Math.max(1, Math.min(product.maxQty, current + delta));
-        productQty[id] = newQty;
-        const el = document.getElementById('qty-' + id);
-        if (el)
-            el.textContent = newQty;
+  } catch(e) {
+    console.error(e);
+    if (e.code === 4001) {
+      showToast('Transaction cancelled');
+    } else {
+      showToast('Transaction failed. Please try again.');
     }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Proceed to Checkout';
+  }
+}
 
-    function filterProducts(filter, btn) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderProducts(filter);
+async function checkoutStripe(customerEmail, orderId) {
+  const btn = document.getElementById('checkoutBtn');
+  btn.disabled = true;
+  btn.textContent = 'Redirecting...';
+  try {
+    const res = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        cart: cart.map(i => ({id: i.id, name: i.name, qty: i.qty, priceUSD: i.priceUSD, fulfillment: i.fulfillment})),
+        customerEmail,
+        successUrl: window.location.origin + '?order=success&id=' + orderId,
+        cancelUrl: window.location.href
+      })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Stripe error: ' + (data.error || 'Unknown error'));
+      btn.disabled = false;
+      btn.textContent = 'Proceed to Checkout';
     }
+  } catch(e) {
+    showToast('Could not connect to payment processor');
+    btn.disabled = false;
+    btn.textContent = 'Proceed to Checkout';
+  }
+}
 
-    function addToCart(id) {
-        const product = products.find(p => p.id === id);
-        const qty = productQty[id] || 1;
-        const existing = cart.find(i => i.id === id);
-        if (existing) {
-            const newQty = Math.min(product.maxQty, existing.qty + qty);
-            existing.qty = newQty;
-        } else {
-            cart.push({
-                ...product,
-                qty
-            });
+function showConfirmModal(orderId, txHash, method, totalUSD, totalELMT) {
+  document.getElementById('confirmOrderId').textContent = orderId;
+  const txSection = document.getElementById('confirmTxSection');
+  const txLink = document.getElementById('confirmTxLink');
+  if (txHash) {
+    txSection.style.display = 'block';
+    txLink.href = 'https://basescan.org/tx/' + txHash;
+    txLink.textContent = txHash;
+  }
+  document.getElementById('confirmItems').innerHTML = cart.map(i => `
+    <div class="confirm-item">
+      <span>${i.name} x${i.qty}</span>
+      <span>$${(i.priceUSD * i.qty).toFixed(2)}</span>
+    </div>
+  `).join('') + `
+    <div class="confirm-item" style="border-top:1px solid var(--border);font-weight:700;">
+      <span>Total</span>
+      <span>$${totalUSD.toFixed(2)}</span>
+    </div>`;
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirmModal() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+// Handle Stripe success redirect
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('order') === 'success') {
+  const orderId = urlParams.get('id') || 'N/A';
+  setTimeout(() => {
+    document.getElementById('confirmOrderId').textContent = orderId;
+    document.getElementById('confirmMsg').textContent = 'Your card payment was successful. A confirmation email has been sent to you.';
+    document.getElementById('confirmTxSection').style.display = 'none';
+    document.getElementById('confirmItems').innerHTML = '<div class="confirm-item"><span>Payment processed via Stripe</span></div>';
+    document.getElementById('confirmModal').classList.add('show');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, 800);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+fetchELMTPrice();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.13.0/dist/index.umd.js"></script>
+<script>
+(async function() {
+  const WCProvider = global['@walletconnect/ethereum-provider'].EthereumProvider;
+
+  const projectId = 'e5c89d315442f18024d5eaf69925c63c';
+
+  let wcProvider = null;
+
+  async function initWC() {
+    wcProvider = await WCProvider.init({
+      projectId,
+      chains: [8453],
+      optionalChains: [1],
+      showQrModal: true,
+      qrModalOptions: {
+        themeMode: 'dark',
+        themeVariables: {
+          '--wcm-accent-color': '#e8ff00',
+          '--wcm-background-color': '#141414'
         }
-        updateCart();
-        showToast(`${product.name} (x${qty}) added to cart`);
+      },
+      metadata: {
+        name: 'ELMT.Store',
+        description: 'The Official Element United Store',
+        url: 'https://elmt.store',
+        icons: ['https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png']
+      },
+      rpcMap: {
+        8453: 'https://base.llamarpc.com',
+        1: 'https://eth.llamarpc.com'
+      }
+    });
+
+    wcProvider.on('accountsChanged', (accounts) => {
+      if (accounts.length > 0) {
+        handleConnected(accounts[0]);
+      } else {
+        handleDisconnected();
+      }
+    });
+
+    wcProvider.on('disconnect', () => {
+      handleDisconnected();
+    });
+
+    // Restore previous session if exists
+    if (wcProvider.session) {
+      const accounts = wcProvider.accounts;
+      if (accounts && accounts.length > 0) {
+        handleConnected(accounts[0]);
+      }
+    }
+  }
+
+  function handleConnected(address) {
+    const short = address.slice(0,6) + '...' + address.slice(-4);
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = short;
+    btn.classList.add('connected');
+    document.getElementById('walletInfo').textContent = 'Connected: ' + short;
+    window.walletAddress = address;
+    window._wcProvider = wcProvider;
+    showToast('Wallet connected');
+  }
+
+  function handleDisconnected() {
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Connect Wallet';
+    btn.classList.remove('connected');
+    document.getElementById('walletInfo').textContent = '';
+    window.walletAddress = null;
+    window._wcProvider = null;
+  }
+
+  window.connectWallet = async function() {
+    if (!wcProvider) await initWC();
+    if (window.walletAddress) {
+      await wcProvider.disconnect();
+      handleDisconnected();
+      showToast('Wallet disconnected');
+      return;
+    }
+    try {
+      await wcProvider.connect({ chains: [8453], optionalChains: [1] });
+      const accounts = wcProvider.accounts;
+      if (accounts && accounts.length > 0) {
+        handleConnected(accounts[0]);
+      }
+    } catch(e) {
+      showToast('Connection cancelled');
+    }
+  };
+
+  window.getEthersSigner = async function() {
+    if (!window._wcProvider) throw new Error('No wallet connected');
+    const provider = new ethers.BrowserProvider(window._wcProvider);
+    return await provider.getSigner();
+  };
+
+  // Also support injected wallets (MetaMask desktop extension)
+  if (typeof window.ethereum !== 'undefined') {
+    window.ethereum.on('accountsChanged', (accounts) => {
+      if (accounts.length > 0 && !window._wcProvider) {
+        window.walletAddress = accounts[0];
+        const short = accounts[0].slice(0,6) + '...' + accounts[0].slice(-4);
+        document.getElementById('connectBtn').textContent = short;
+        document.getElementById('connectBtn').classList.add('connected');
+        document.getElementById('walletInfo').textContent = 'Connected: ' + short;
+      }
+    });
+  }
+
+  // Override connectWallet to handle injected (MetaMask) vs WalletConnect
+  window.connectWallet = async function() {
+    if (window.walletAddress) {
+      // Disconnect
+      if (window._wcProvider) {
+        await window._wcProvider.disconnect();
+      }
+      handleDisconnected();
+      showToast('Wallet disconnected');
+      return;
     }
 
-    function updateCartQty(id, delta) {
-        const item = cart.find(i => i.id === id);
-        if (!item)
-            return;
-        const product = products.find(p => p.id === id);
-        item.qty = Math.max(1, Math.min(product.maxQty, item.qty + delta));
-        updateCart();
-    }
-
-    function removeFromCart(id) {
-        cart = cart.filter(i => i.id !== id);
-        updateCart();
-    }
-
-    function updateCart() {
-        const count = cart.reduce((s, i) => s + i.qty, 0);
-        document.getElementById('cartCount').textContent = count;
-        const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0);
-        const totalELMT = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
-        document.getElementById('cartTotalELMT').textContent = totalELMT.toLocaleString() + ' ELMT';
-        document.getElementById('cartTotalUSD').textContent = '$' + totalUSD.toFixed(2);
-        const itemsEl = document.getElementById('cartItems');
-        if (cart.length === 0) {
-            itemsEl.innerHTML = '<div class="cart-empty"><div style="font-size:40px;">🛒</div><p>Your cart is empty</p></div>';
-        } else {
-            itemsEl.innerHTML = cart.map(i => {
-                const thumbHtml = i.img ? `<img src="${i.img}" alt="${i.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"/>` : i.icon;
-                return `
-                      <div class="cart-item">
-                        <div class="cart-item-icon">${thumbHtml}</div>
-                        <div class="cart-item-info">
-                          <div class="cart-item-name">${i.name}</div>
-                          <div class="cart-item-price">$${(i.priceUSD * i.qty).toFixed(2)} USD</div>
-                          <div class="cart-item-qty">
-                            <button class="cart-qty-btn" onclick="updateCartQty(${i.id},-1)">-</button>
-                            <span class="cart-qty-val">${i.qty}</span>
-                            <button class="cart-qty-btn" onclick="updateCartQty(${i.id},1)">+</button>
-                          </div>
-                        </div>
-                        <button class="remove-item" onclick="removeFromCart(${i.id})">✕</button>
-                      </div>`;
-            }).join('');
-        }
-    }
-
-    function handlePaymentMethodChange() {
-        const method = document.getElementById('paymentMethod').value;
-        const note = document.getElementById('walletRequiredNote');
-        const feeNote = document.getElementById('networkFeeNote');
-        note.style.display = method !== 'fiat' ? 'block' : 'none';
-        // Show Ethereum fee warning if user's wallet is on mainnet
-        if (method !== 'fiat' && window._web3modal) {
-            const chainId = window._web3modal.getChainId ? window._web3modal.getChainId() : null;
-            feeNote.style.display = chainId === 1 ? 'block' : 'none';
-        } else {
-            feeNote.style.display = 'none';
-        }
-    }
-
-    function toggleCart() {
-        document.getElementById('cartDrawer').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('show');
-    }
-
-    async function connectWallet() {
-        if (window._w3mConnected && window.walletAddress) {
-            await window._web3modal.disconnect();
-            showToast('Wallet disconnected');
-            return;
-        }
-        window._web3modal.open();
-    }
-
-    async function sendERC20(contractAddress, toAddress, amount, decimals) {
-        const signer = await window.getEthersSigner();
-        const erc20Abi = ['function transfer(address to, uint256 amount) returns (bool)'];
-        const contract = new ethers.Contract(contractAddress, erc20Abi, signer);
-        const amountBN = ethers.parseUnits(amount.toFixed(decimals), decimals);
-        const tx = await contract.transfer(toAddress, amountBN);
-        return tx.hash;
-    }
-
-    async function sendETH(toAddress, amountUSD) {
-        const signer = await window.getEthersSigner();
-        const ethPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-        const ethData = await ethPriceRes.json();
-        const ethPrice = ethData.ethereum.usd;
-        const ethAmount = (amountUSD / ethPrice).toFixed(18);
-        const tx = await signer.sendTransaction({
-            to: toAddress,
-            value: ethers.parseEther(ethAmount)
-        });
-        return tx.hash;
-    }
-
-    async function checkout() {
-        if (cart.length === 0) {
-            showToast('Your cart is empty');
-            return;
-        }
-
-        const customerEmail = document.getElementById('customerEmail').value.trim();
-        if (!customerEmail || !customerEmail.includes('@')) {
-            showToast('Please enter a valid email address');
-            document.getElementById('customerEmail').focus();
-            return;
-        }
-
-        const method = document.getElementById('paymentMethod').value;
-        const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0);
-        const totalELMT = cart.reduce((s, i) => s + calcELMT(i.priceUSD) * i.qty, 0);
-        const orderId = generateOrderId();
-
-        if (method === 'fiat') {
-            await checkoutStripe(customerEmail, orderId);
-            return;
-        }
-
-        if (!window.walletAddress) {
-            showToast('Please connect your wallet first');
-            return;
-        }
-
-        const btn = document.getElementById('checkoutBtn');
-        btn.disabled = true;
-        btn.textContent = 'Processing...';
-
-        try {
-            let txHash;
-
-            if (method === 'elmt') {
-                txHash = await sendERC20(ELMT_CONTRACT, ELEMENT_WALLET, totalUSD / elmtPriceUSD, 18);
-            } else if (method === 'eth') {
-                txHash = await sendETH(ELEMENT_WALLET, totalUSD);
-            } else if (method === 'usdc') {
-                txHash = await sendERC20(USDC_CONTRACT, ELEMENT_WALLET, totalUSD, 6);
-            } else if (method === 'usdt') {
-                txHash = await sendERC20(USDT_CONTRACT, ELEMENT_WALLET, totalUSD, 6);
+    // Show choice: injected (MetaMask) or WalletConnect
+    if (typeof window.ethereum !== 'undefined') {
+      // Has injected wallet -- try it first
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (accounts.length > 0) {
+          // Switch to Base
+          try {
+            await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
+          } catch(e) {
+            if (e.code === 4902) {
+              await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x2105', chainName: 'Base', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base.llamarpc.com'], blockExplorerUrls: ['https://basescan.org'] }] });
             }
-
-            // Send confirmation emails
-            await fetch('/.netlify/functions/send-confirmation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    customerEmail,
-                    customerName: '',
-                    orderId,
-                    txHash,
-                    paymentMethod: method.toUpperCase(),
-                    cart: cart.map(i => ({
-                        name: i.name,
-                        qty: i.qty,
-                        priceUSD: i.priceUSD
-                    })),
-                    total: totalELMT.toLocaleString() + ' ELMT (≈ $' + totalUSD.toFixed(2) + ' USD)'
-                })
-            });
-
-            showConfirmModal(orderId, txHash, method.toUpperCase(), totalUSD, totalELMT);
-            cart = [];
-            updateCart();
-            toggleCart();
-
-        } catch (e) {
-            console.error(e);
-            if (e.code === 4001) {
-                showToast('Transaction cancelled');
-            } else {
-                showToast('Transaction failed. Please try again.');
-            }
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Proceed to Checkout';
+          }
+          window.walletAddress = accounts[0];
+          window._injectedProvider = window.ethereum;
+          const short = accounts[0].slice(0,6) + '...' + accounts[0].slice(-4);
+          document.getElementById('connectBtn').textContent = short;
+          document.getElementById('connectBtn').classList.add('connected');
+          document.getElementById('walletInfo').textContent = 'Connected: ' + short;
+          showToast('Wallet connected to Base');
+          return;
         }
+      } catch(e) {
+        if (e.code === 4001) { showToast('Connection cancelled'); return; }
+      }
     }
 
-    async function checkoutStripe(customerEmail, orderId) {
-        const btn = document.getElementById('checkoutBtn');
-        btn.disabled = true;
-        btn.textContent = 'Redirecting...';
-        try {
-            const res = await fetch('/.netlify/functions/create-checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    cart: cart.map(i => ({
-                        id: i.id,
-                        name: i.name,
-                        qty: i.qty,
-                        priceUSD: i.priceUSD,
-                        fulfillment: i.fulfillment
-                    })),
-                    customerEmail,
-                    successUrl: window.location.origin + '?order=success&id=' + orderId,
-                    cancelUrl: window.location.href
-                })
-            });
-            const data = await res.json();
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                showToast('Stripe error: ' + (data.error || 'Unknown error'));
-                btn.disabled = false;
-                btn.textContent = 'Proceed to Checkout';
-            }
-        } catch (e) {
-            showToast('Could not connect to payment processor');
-            btn.disabled = false;
-            btn.textContent = 'Proceed to Checkout';
-        }
+    // No injected wallet -- use WalletConnect
+    if (!wcProvider) await initWC();
+    try {
+      await wcProvider.connect({ chains: [8453], optionalChains: [1] });
+      const accounts = wcProvider.accounts;
+      if (accounts && accounts.length > 0) handleConnected(accounts[0]);
+    } catch(e) {
+      showToast('Connection cancelled');
     }
+  };
 
-    function showConfirmModal(orderId, txHash, method, totalUSD, totalELMT) {
-        document.getElementById('confirmOrderId').textContent = orderId;
-        const txSection = document.getElementById('confirmTxSection');
-        const txLink = document.getElementById('confirmTxLink');
-        if (txHash) {
-            txSection.style.display = 'block';
-            txLink.href = 'https://basescan.org/tx/' + txHash;
-            txLink.textContent = txHash;
-        }
-        document.getElementById('confirmItems').innerHTML = cart.map(i => `
-            <div class="confirm-item">
-              <span>${i.name} x${i.qty}</span>
-              <span>$${(i.priceUSD * i.qty).toFixed(2)}</span>
-            </div>
-          `).join('') + `
-            <div class="confirm-item" style="border-top:1px solid var(--border);font-weight:700;">
-              <span>Total</span>
-              <span>$${totalUSD.toFixed(2)}</span>
-            </div>`;
-        document.getElementById('confirmModal').classList.add('show');
-    }
+  window.getEthersSigner = async function() {
+    const provider = window._injectedProvider || window._wcProvider;
+    if (!provider) throw new Error('No wallet connected');
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    return await ethersProvider.getSigner();
+  };
 
-    function closeConfirmModal() {
-        document.getElementById('confirmModal').classList.remove('show');
-    }
-
-    // Handle Stripe success redirect
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('order') === 'success') {
-        const orderId = urlParams.get('id') || 'N/A';
-        setTimeout(() => {
-            document.getElementById('confirmOrderId').textContent = orderId;
-            document.getElementById('confirmMsg').textContent = 'Your card payment was successful. A confirmation email has been sent to you.';
-            document.getElementById('confirmTxSection').style.display = 'none';
-            document.getElementById('confirmItems').innerHTML = '<div class="confirm-item"><span>Payment processed via Stripe</span></div>';
-            document.getElementById('confirmModal').classList.add('show');
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }, 800);
-    }
-
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2800);
-    }
-
-    fetchELMTPrice();
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.17.0/dist/index.umd.js"></script>
-    <script>
-    (async function() {
-        const WCProvider = global['@walletconnect/ethereum-provider'].EthereumProvider;
-
-        const projectId = 'e5c89d315442f18024d5eaf69925c63c';
-
-        let wcProvider = null;
-
-        async function initWC() {
-            wcProvider = await WCProvider.init({
-                projectId,
-                chains: [8453],
-                optionalChains: [1],
-                showQrModal: true,
-                qrModalOptions: {
-                    themeMode: 'dark',
-                    themeVariables: {
-                        '--wcm-accent-color': '#e8ff00',
-                        '--wcm-background-color': '#141414'
-                    }
-                },
-                metadata: {
-                    name: 'ELMT.Store',
-                    description: 'The Official Element United Store',
-                    url: 'https://elmt.store',
-                    icons: ['https://raw.githubusercontent.com/Element-Blockchain/images/main/products/ELMT%20Token.png']
-                },
-                rpcMap: {
-                    8453: 'https://base.llamarpc.com',
-                    1: 'https://eth.llamarpc.com'
-                }
-            });
-
-            wcProvider.on('accountsChanged', (accounts) => {
-                if (accounts.length > 0) {
-                    handleConnected(accounts[0]);
-                } else {
-                    handleDisconnected();
-                }
-            });
-
-            wcProvider.on('disconnect', () => {
-                handleDisconnected();
-            });
-
-            // Restore previous session if exists
-            if (wcProvider.session) {
-                const accounts = wcProvider.accounts;
-                if (accounts && accounts.length > 0) {
-                    handleConnected(accounts[0]);
-                }
-            }
-        }
-
-        function handleConnected(address) {
-            const short = address.slice(0, 6) + '...' + address.slice(-4);
-            const btn = document.getElementById('connectBtn');
-            btn.textContent = short;
-            btn.classList.add('connected');
-            document.getElementById('walletInfo').textContent = 'Connected: ' + short;
-            window.walletAddress = address;
-            window._wcProvider = wcProvider;
-            showToast('Wallet connected');
-        }
-
-        function handleDisconnected() {
-            const btn = document.getElementById('connectBtn');
-            btn.textContent = 'Connect Wallet';
-            btn.classList.remove('connected');
-            document.getElementById('walletInfo').textContent = '';
-            window.walletAddress = null;
-            window._wcProvider = null;
-        }
-
-        window.connectWallet = async function() {
-            if (!wcProvider)
-                await initWC();
-            if (window.walletAddress) {
-                await wcProvider.disconnect();
-                handleDisconnected();
-                showToast('Wallet disconnected');
-                return;
-            }
-            try {
-                await wcProvider.connect({
-                    chains: [8453],
-                    optionalChains: [1]
-                });
-                const accounts = wcProvider.accounts;
-                if (accounts && accounts.length > 0) {
-                    handleConnected(accounts[0]);
-                }
-            } catch (e) {
-                showToast('Connection cancelled');
-            }
-        };
-
-        window.getEthersSigner = async function() {
-            if (!window._wcProvider)
-                throw new Error('No wallet connected');
-            const provider = new ethers.BrowserProvider(window._wcProvider);
-            return await provider.getSigner();
-        };
-
-        // Also support injected wallets (MetaMask desktop extension)
-        if (typeof window.ethereum !== 'undefined') {
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length > 0 && !window._wcProvider) {
-                    window.walletAddress = accounts[0];
-                    const short = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
-                    document.getElementById('connectBtn').textContent = short;
-                    document.getElementById('connectBtn').classList.add('connected');
-                    document.getElementById('walletInfo').textContent = 'Connected: ' + short;
-                }
-            });
-        }
-
-        // Override connectWallet to handle injected (MetaMask) vs WalletConnect
-        window.connectWallet = async function() {
-            if (window.walletAddress) {
-                // Disconnect
-                if (window._wcProvider) {
-                    await window._wcProvider.disconnect();
-                }
-                handleDisconnected();
-                showToast('Wallet disconnected');
-                return;
-            }
-
-            // Show choice: injected (MetaMask) or WalletConnect
-            if (typeof window.ethereum !== 'undefined') {
-                // Has injected wallet -- try it first
-                try {
-                    const accounts = await window.ethereum.request({
-                        method: 'eth_requestAccounts'
-                    });
-                    if (accounts.length > 0) {
-                        // Switch to Base
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_switchEthereumChain',
-                                params: [{
-                                    chainId: '0x2105'
-                                }]
-                            });
-                        } catch (e) {
-                            if (e.code === 4902) {
-                                await window.ethereum.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [{
-                                        chainId: '0x2105',
-                                        chainName: 'Base',
-                                        nativeCurrency: {
-                                            name: 'ETH',
-                                            symbol: 'ETH',
-                                            decimals: 18
-                                        },
-                                        rpcUrls: ['https://base.llamarpc.com'],
-                                        blockExplorerUrls: ['https://basescan.org']
-                                    }]
-                                });
-                            }
-                        }
-                        window.walletAddress = accounts[0];
-                        window._injectedProvider = window.ethereum;
-                        const short = accounts[0].slice(0, 6) + '...' + accounts[0].slice(-4);
-                        document.getElementById('connectBtn').textContent = short;
-                        document.getElementById('connectBtn').classList.add('connected');
-                        document.getElementById('walletInfo').textContent = 'Connected: ' + short;
-                        showToast('Wallet connected to Base');
-                        return;
-                    }
-                } catch (e) {
-                    if (e.code === 4001) {
-                        showToast('Connection cancelled');
-                        return;
-                    }
-                }
-            }
-
-            // No injected wallet -- use WalletConnect
-            if (!wcProvider)
-                await initWC();
-            try {
-                await wcProvider.connect({
-                    chains: [8453],
-                    optionalChains: [1]
-                });
-                const accounts = wcProvider.accounts;
-                if (accounts && accounts.length > 0)
-                    handleConnected(accounts[0]);
-            } catch (e) {
-                showToast('Connection cancelled');
-            }
-        };
-
-        window.getEthersSigner = async function() {
-            const provider = window._injectedProvider || window._wcProvider;
-            if (!provider)
-                throw new Error('No wallet connected');
-            const ethersProvider = new ethers.BrowserProvider(provider);
-            return await ethersProvider.getSigner();
-        };
-
-        initWC();
-    })();
-    </script>
+  initWC();
+})();
+</script>
 </body>
 </html>
