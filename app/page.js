@@ -212,7 +212,6 @@ export default function StorePage() {
       }
 
       // Send confirmation emails
-      const chainId = await getChainId()
       await fetch('/api/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
