@@ -23,7 +23,7 @@ export default function ConfirmModal({ data, onClose }) {
           <div className={styles.txSection}>
             <p>Transaction Hash</p>
             <a
-              href={`https://basescan.org/tx/${txHash}`}
+              href={`${data.chainId === 1 ? 'https://etherscan.io' : 'https://basescan.org'}/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
             >
