@@ -212,6 +212,7 @@ export default function StorePage() {
       }
 
       // Send confirmation emails
+      const chainId = await getChainId()
       await fetch('/api/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -223,11 +224,10 @@ export default function StorePage() {
           paymentMethod: paymentMethod.toUpperCase(),
           cart: cart.map(i => ({ name: i.name, qty: i.qty, priceUSD: i.priceUSD })),
           total: `${totalELMT.toLocaleString()} ELMT (≈ $${totalUSD.toFixed(2)} USD)`,
-          chainId: await getChainId(),
+          chainId,
         }),
       })
 
-      const chainId = await getChainId()
       setConfirmData({
         orderId,
         txHash,
