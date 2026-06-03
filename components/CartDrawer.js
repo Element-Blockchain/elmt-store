@@ -7,14 +7,15 @@ export default function CartDrawer({
   open, cart, totalUSD, totalELMT, walletAddress,
   checkingOut, onClose, onUpdateQty, onRemove, onCheckout
 }) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('elmt')
 
   const isCrypto = paymentMethod !== 'fiat'
-  const isEthereum = paymentMethod !== 'fiat' && walletAddress
 
   async function handleCheckout() {
-    await onCheckout(email, paymentMethod)
+    await onCheckout(email, paymentMethod, firstName, lastName)
   }
 
   return (
@@ -63,10 +64,26 @@ export default function CartDrawer({
           <span>${totalUSD.toFixed(2)}</span>
         </div>
 
+        <div className={styles.nameRow}>
+          <input
+            className={styles.nameInput}
+            type="text"
+            placeholder="First name (required)"
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+          />
+          <input
+            className={styles.nameInput}
+            type="text"
+            placeholder="Last name (required)"
+            value={lastName}
+            onChange={e => setLastName(e.target.value)}
+          />
+        </div>
         <input
           className={styles.emailInput}
           type="email"
-          placeholder="Your email address (required)"
+          placeholder="Email address (required)"
           value={email}
           onChange={e => setEmail(e.target.value)}
         />
