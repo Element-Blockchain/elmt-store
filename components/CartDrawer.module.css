@@ -68,6 +68,19 @@
 .totalElmt { color: var(--accent); }
 .totalUsdRow { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 13px; color: var(--gray); }
 
+.nameRow { display: flex; gap: 8px; margin-bottom: 10px; }
+.nameInput {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.nameInput:focus { outline: none; border-color: var(--accent); }
+.nameInput::placeholder { color: var(--gray); }
+
 .emailInput {
   width: 100%;
   background: var(--surface2);
