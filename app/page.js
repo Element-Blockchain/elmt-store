@@ -171,17 +171,20 @@ export default function StorePage() {
     return Number(network.chainId)
   }
 
-  async function handleCheckout(customerEmail, paymentMethod) {
+  async function handleCheckout(customerEmail, paymentMethod, firstName, lastName) {
     if (cart.length === 0) { showToast('Your cart is empty'); return }
+    if (!firstName?.trim()) { showToast('Please enter your first name'); return }
+    if (!lastName?.trim()) { showToast('Please enter your last name'); return }
     if (!customerEmail || !customerEmail.includes('@')) {
       showToast('Please enter a valid email address')
       return
     }
 
+    const customerName = `${firstName.trim()} ${lastName.trim()}`
     const orderId = generateOrderId()
 
     if (paymentMethod === 'fiat') {
-      await handleStripeCheckout(customerEmail, orderId)
+      await handleStripeCheckout(customerEmail, orderId, customerName)
       return
     }
 
@@ -214,17 +217,21 @@ export default function StorePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerEmail,
+          customerName,
           orderId,
           txHash,
           paymentMethod: paymentMethod.toUpperCase(),
           cart: cart.map(i => ({ name: i.name, qty: i.qty, priceUSD: i.priceUSD })),
           total: `${totalELMT.toLocaleString()} ELMT (≈ $${totalUSD.toFixed(2)} USD)`,
+          chainId: await getChainId(),
         }),
       })
 
+      const chainId = await getChainId()
       setConfirmData({
         orderId,
         txHash,
+        chainId,
         paymentMethod: paymentMethod.toUpperCase(),
         items: [...cart],
         totalUSD,
@@ -245,7 +252,7 @@ export default function StorePage() {
     }
   }
 
-  async function handleStripeCheckout(customerEmail, orderId) {
+  async function handleStripeCheckout(customerEmail, orderId, customerName) {
     setCheckingOut(true)
     try {
       const res = await fetch('/api/create-checkout', {
@@ -254,6 +261,7 @@ export default function StorePage() {
         body: JSON.stringify({
           cart: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, priceUSD: i.priceUSD, fulfillment: i.fulfillment })),
           customerEmail,
+          customerName,
           successUrl: `${window.location.origin}?order=success&id=${orderId}`,
           cancelUrl: window.location.href,
         }),
