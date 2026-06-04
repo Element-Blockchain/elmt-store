@@ -96,6 +96,10 @@ export default function CartDrawer({
           <span>${totalUSD.toFixed(2)}</span>
         </div>
 
+        <div className={styles.walletEmailNotice}>
+          Please use the email associated with your Element Wallet so digital products can be assigned correctly.
+        </div>
+
         <div className={styles.nameRow}>
           <input
             className={styles.nameInput}
