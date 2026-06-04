@@ -8,14 +8,30 @@ const INTERNAL_EMAILS = ['support@elementunited.com', 'pbarlow@elementunited.com
 function orderRows(cart) {
   return cart.map(item => `
     <tr>
-      <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#fff;font-size:14px;">${item.name}</td>
-      <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#888;font-size:14px;text-align:center;">x${item.qty}</td>
-      <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#e8ff00;font-size:14px;text-align:right;">$${(item.priceUSD * item.qty).toFixed(2)}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;vertical-align:middle;">
+        ${item.img ? `<img src="${item.img}" alt="${item.name}" width="48" height="48" style="border-radius:8px;object-fit:contain;background:#1a1a1a;display:block;"/>` : `<div style="width:48px;height:48px;background:#1a1a1a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;">${item.icon || '📦'}</div>`}
+      </td>
+      <td style="padding:10px 0 10px 12px;border-bottom:1px solid #2a2a2a;color:#fff;font-size:14px;vertical-align:middle;">${item.name}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#888;font-size:14px;text-align:center;vertical-align:middle;">x${item.qty}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #2a2a2a;color:#e8ff00;font-size:14px;text-align:right;vertical-align:middle;">$${(item.priceUSD * item.qty).toFixed(2)}</td>
     </tr>
   `).join('')
 }
 
-function txSection(txHash) {
+function shippingSection(shippingAddress) {
+  if (!shippingAddress) return ''
+  const { address1, address2, city, state, zip, country } = shippingAddress
+  return `
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:16px;margin:16px 0;">
+      <p style="color:#888;font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Shipping Address</p>
+      <p style="color:#fff;font-size:14px;line-height:1.6;margin:0;">
+        ${address1}${address2 ? '<br>' + address2 : ''}<br>
+        ${city}, ${state} ${zip}<br>
+        ${country === 'US' ? 'United States' : 'Canada'}
+      </p>
+    </div>
+  `
+}
   if (!txHash) return ''
   return `
     <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:16px;margin:20px 0;">
@@ -26,7 +42,7 @@ function txSection(txHash) {
   `
 }
 
-function customerTemplate({ customerName, orderId, cart, paymentMethod, total, txHash }) {
+function customerTemplate({ customerName, orderId, cart, paymentMethod, total, txHash, shippingAddress }) {
   return `<!DOCTYPE html>
 <html>
 <body style="background:#0d0d0d;margin:0;padding:40px 20px;font-family:Inter,sans-serif;">
@@ -52,6 +68,7 @@ function customerTemplate({ customerName, orderId, cart, paymentMethod, total, t
         <span style="color:#e8ff00;font-size:16px;font-weight:800;">${total}</span>
       </div>
       ${txSection(txHash)}
+      ${shippingSection(shippingAddress)}
     </div>
     <p style="color:#444;font-size:11px;text-align:center;margin-top:24px;">Questions? Contact us at <a href="mailto:support@elementunited.com" style="color:#888;">support@elementunited.com</a></p>
     <p style="color:#333;font-size:10px;text-align:center;margin-top:8px;">© 2026 Element United. All rights reserved.</p>
@@ -60,7 +77,7 @@ function customerTemplate({ customerName, orderId, cart, paymentMethod, total, t
 </html>`
 }
 
-function internalTemplate({ customerEmail, customerName, orderId, cart, paymentMethod, total, txHash }) {
+function internalTemplate({ customerEmail, customerName, orderId, cart, paymentMethod, total, txHash, shippingAddress }) {
   return `<!DOCTYPE html>
 <html>
 <body style="background:#0d0d0d;margin:0;padding:40px 20px;font-family:Inter,sans-serif;">
@@ -82,6 +99,7 @@ function internalTemplate({ customerEmail, customerName, orderId, cart, paymentM
         <span style="color:#fff;font-size:13px;font-weight:700;">${paymentMethod}</span>
       </div>
       ${txSection(txHash)}
+      ${shippingSection(shippingAddress)}
     </div>
   </div>
 </body>
@@ -112,13 +130,13 @@ async function sendEmail({ to, subject, html }) {
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { customerEmail, customerName, orderId, txHash, paymentMethod, cart, total } = body
+    const { customerEmail, customerName, orderId, txHash, paymentMethod, cart, total, shippingAddress } = body
 
     // Customer email
     await sendEmail({
       to: customerEmail,
       subject: 'Your ELMT.Store Order Confirmation',
-      html: customerTemplate({ customerName, orderId, cart, paymentMethod, total, txHash }),
+      html: customerTemplate({ customerName, orderId, cart, paymentMethod, total, txHash, shippingAddress }),
     })
 
     // Internal notifications
@@ -126,7 +144,7 @@ export async function POST(request) {
       await sendEmail({
         to: email,
         subject: `New ELMT.Store Order - ${orderId}`,
-        html: internalTemplate({ customerEmail, customerName, orderId, cart, paymentMethod, total, txHash }),
+        html: internalTemplate({ customerEmail, customerName, orderId, cart, paymentMethod, total, txHash, shippingAddress }),
       })
     }
 
