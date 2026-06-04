@@ -3,6 +3,17 @@
 import { useState } from 'react'
 import styles from './CartDrawer.module.css'
 
+const US_STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
+  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
+  'VA','WA','WV','WI','WY','DC'
+]
+
+const CA_PROVINCES = [
+  'AB','BC','MB','NB','NL','NS','NT','NU','ON','PE','QC','SK','YT'
+]
+
 export default function CartDrawer({
   open, cart, totalUSD, totalELMT, walletAddress,
   checkingOut, onClose, onUpdateQty, onRemove, onCheckout
@@ -12,11 +23,32 @@ export default function CartDrawer({
   const [email, setEmail] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('elmt')
 
+  // Shipping fields
+  const [shipAddress1, setShipAddress1] = useState('')
+  const [shipAddress2, setShipAddress2] = useState('')
+  const [shipCity, setShipCity] = useState('')
+  const [shipState, setShipState] = useState('')
+  const [shipZip, setShipZip] = useState('')
+  const [shipCountry, setShipCountry] = useState('US')
+
   const isCrypto = paymentMethod !== 'fiat'
+  const hasPhysical = cart.some(i => i.fulfillment === 'Physical')
+  const needsShipping = hasPhysical && isCrypto
+
+  const shippingAddress = needsShipping ? {
+    address1: shipAddress1,
+    address2: shipAddress2,
+    city: shipCity,
+    state: shipState,
+    zip: shipZip,
+    country: shipCountry,
+  } : null
 
   async function handleCheckout() {
-    await onCheckout(email, paymentMethod, firstName, lastName)
+    await onCheckout(email, paymentMethod, firstName, lastName, shippingAddress)
   }
+
+  const stateOptions = shipCountry === 'US' ? US_STATES : CA_PROVINCES
 
   return (
     <div className={`${styles.drawer} ${open ? styles.open : ''}`}>
@@ -80,6 +112,7 @@ export default function CartDrawer({
             onChange={e => setLastName(e.target.value)}
           />
         </div>
+
         <input
           className={styles.emailInput}
           type="email"
@@ -109,6 +142,63 @@ export default function CartDrawer({
         {isCrypto && (
           <div className={styles.feeNotice}>
             ⚠️ If your wallet is on Ethereum mainnet, higher gas fees apply. Switch to Base network for lower fees.
+          </div>
+        )}
+
+        {needsShipping && (
+          <div className={styles.shippingSection}>
+            <div className={styles.shippingTitle}>📦 Shipping Address</div>
+            <input
+              className={styles.shipInput}
+              type="text"
+              placeholder="Address line 1 (required)"
+              value={shipAddress1}
+              onChange={e => setShipAddress1(e.target.value)}
+            />
+            <input
+              className={styles.shipInput}
+              type="text"
+              placeholder="Address line 2 (optional)"
+              value={shipAddress2}
+              onChange={e => setShipAddress2(e.target.value)}
+            />
+            <input
+              className={styles.shipInput}
+              type="text"
+              placeholder="City (required)"
+              value={shipCity}
+              onChange={e => setShipCity(e.target.value)}
+            />
+            <div className={styles.shipRow}>
+              <select
+                className={styles.shipSelect}
+                value={shipCountry}
+                onChange={e => { setShipCountry(e.target.value); setShipState('') }}
+              >
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+              </select>
+              <select
+                className={styles.shipSelect}
+                value={shipState}
+                onChange={e => setShipState(e.target.value)}
+              >
+                <option value="">{shipCountry === 'US' ? 'State' : 'Province'}</option>
+                {stateOptions.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <input
+                className={styles.shipZip}
+                type="text"
+                placeholder={shipCountry === 'US' ? 'ZIP' : 'Postal'}
+                value={shipZip}
+                onChange={e => setShipZip(e.target.value)}
+              />
+            </div>
+            <div className={styles.shippingNote}>
+              🚚 Standard shipping: {totalUSD >= 200 ? 'FREE' : '$6.99'} · USA &amp; Canada only
+            </div>
           </div>
         )}
 
