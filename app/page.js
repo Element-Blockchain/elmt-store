@@ -171,13 +171,23 @@ export default function StorePage() {
     return Number(network.chainId)
   }
 
-  async function handleCheckout(customerEmail, paymentMethod, firstName, lastName) {
+  async function handleCheckout(customerEmail, paymentMethod, firstName, lastName, shippingAddress) {
     if (cart.length === 0) { showToast('Your cart is empty'); return }
     if (!firstName?.trim()) { showToast('Please enter your first name'); return }
     if (!lastName?.trim()) { showToast('Please enter your last name'); return }
     if (!customerEmail || !customerEmail.includes('@')) {
       showToast('Please enter a valid email address')
       return
+    }
+
+    const hasPhysical = cart.some(i => i.fulfillment === 'Physical')
+    const isCrypto = paymentMethod !== 'fiat'
+
+    if (hasPhysical && isCrypto && shippingAddress) {
+      if (!shippingAddress.address1?.trim()) { showToast('Please enter your street address'); return }
+      if (!shippingAddress.city?.trim()) { showToast('Please enter your city'); return }
+      if (!shippingAddress.state?.trim()) { showToast('Please select your state/province'); return }
+      if (!shippingAddress.zip?.trim()) { showToast('Please enter your ZIP/postal code'); return }
     }
 
     const customerName = `${firstName.trim()} ${lastName.trim()}`
@@ -221,8 +231,9 @@ export default function StorePage() {
           orderId,
           txHash,
           paymentMethod: paymentMethod.toUpperCase(),
-          cart: cart.map(i => ({ name: i.name, qty: i.qty, priceUSD: i.priceUSD })),
+          cart: cart.map(i => ({ name: i.name, qty: i.qty, priceUSD: i.priceUSD, img: i.img, icon: i.icon })),
           total: `${totalELMT.toLocaleString()} ELMT (≈ $${totalUSD.toFixed(2)} USD)`,
+          shippingAddress,
           chainId,
         }),
       })
