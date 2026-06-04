@@ -68,6 +68,17 @@
 .totalElmt { color: var(--accent); }
 .totalUsdRow { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 13px; color: var(--gray); }
 
+.walletEmailNotice {
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(232,255,0,0.08);
+  border: 1px solid rgba(232,255,0,0.25);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
 .nameRow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
 .nameInput {
   width: 100%;
@@ -193,5 +204,6 @@
 .walletInfo { font-size: 11px; color: var(--gray); text-align: center; margin-top: 8px; }
 
 @media (max-width: 480px) {
-  .drawer { width: 100%; right: -100%; }
+  .drawer { width: 100vw; right: -100vw; }
+  .open { right: 0; }
 }
