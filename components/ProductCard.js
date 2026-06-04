@@ -4,7 +4,7 @@ import { useState } from 'react'
 import styles from './ProductCard.module.css'
 
 export default function ProductCard({ product: p, qty, calcELMT, onChangeQty, onAddToCart }) {
-  const [imgLoaded, setImgLoaded] = useState(false)
+  const [imgError, setImgError] = useState(false)
 
   const isCollectibleSoldOut = p.soldOut && p.category === 'collectible'
   const elmtPrice = isCollectibleSoldOut
@@ -17,18 +17,17 @@ export default function ProductCard({ product: p, qty, calcELMT, onChangeQty, on
   return (
     <div className={`${styles.card} ${p.soldOut ? styles.soldOut : ''}`}>
       <div className={styles.imgWrap}>
-        {p.img && (
+        {p.img && !imgError && (
           <img
             src={p.img}
             alt={p.name}
-            className={`${styles.img} ${imgLoaded ? styles.imgLoaded : ''}`}
-            onLoad={() => setImgLoaded(true)}
-            onError={e => { e.target.style.display = 'none' }}
+            className={styles.img}
+            onError={() => setImgError(true)}
           />
         )}
-        <span className={styles.icon} style={{ display: imgLoaded ? 'none' : 'flex' }}>
-          {p.icon}
-        </span>
+        {(!p.img || imgError) && (
+          <span className={styles.icon}>{p.icon}</span>
+        )}
         {p.soldOut && <span className={styles.soldOutBadge}>Sold Out</span>}
         {p.isNew && !p.soldOut && <span className={styles.newBadge}>New</span>}
         <span className={styles.fulfillmentBadge}>{p.fulfillment}</span>
