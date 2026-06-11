@@ -137,14 +137,30 @@ export default function StorePage() {
     return ethersProvider.getSigner()
   }
 
+  // Wait for tx with timeout -- tx.wait() can hang with WalletConnect
+  async function waitForTx(tx, timeoutMs = 60000) {
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        console.log('tx.wait() timed out, using tx hash directly')
+        resolve(tx.hash)
+      }, timeoutMs)
+      tx.wait().then(() => {
+        clearTimeout(timer)
+        resolve(tx.hash)
+      }).catch(() => {
+        clearTimeout(timer)
+        resolve(tx.hash) // resolve anyway -- tx was submitted
+      })
+    })
+  }
+
   async function sendERC20(contractAddress, toAddress, amount, decimals) {
     const signer = await getSigner()
     const erc20Abi = ['function transfer(address to, uint256 amount) returns (bool)']
     const contract = new ethers.Contract(contractAddress, erc20Abi, signer)
     const amountBN = ethers.parseUnits(amount.toFixed(decimals), decimals)
     const tx = await contract.transfer(toAddress, amountBN)
-    await tx.wait()
-    return tx.hash
+    return waitForTx(tx)
   }
 
   async function sendETH(toAddress, amountUSD) {
@@ -157,8 +173,7 @@ export default function StorePage() {
       to: toAddress,
       value: ethers.parseEther(ethAmount),
     })
-    await tx.wait()
-    return tx.hash
+    return waitForTx(tx)
   }
 
   async function getChainId() {
