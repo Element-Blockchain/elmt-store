@@ -136,17 +136,56 @@ async function sendEmail({ to, subject, html }) {
   return res.json()
 }
 
+async function logOrderToSupabase({ orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress }) {
+  try {
+    const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0)
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': 'Bearer ' + process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        order_id: orderId,
+        customer_name: customerName || null,
+        customer_email: customerEmail,
+        payment_method: paymentMethod,
+        tx_hash: txHash || null,
+        chain_id: chainId || null,
+        total_usd: totalUSD,
+        total_display: total,
+        items: cart,
+        shipping_address: shippingAddress || null,
+        status: 'confirmed',
+      }),
+    })
+    if (!res.ok) {
+      const err = await res.text()
+      console.error('Supabase logging error:', err)
+    }
+  } catch (err) {
+    console.error('Failed to log order to Supabase:', err)
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
     const { customerEmail, customerName, orderId, txHash, chainId, paymentMethod, cart, total, shippingAddress } = body
 
+    // Log to Supabase (non-blocking -- don't fail order if this fails)
+    logOrderToSupabase({ orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress })
+
+    // Send customer confirmation email
     await sendEmail({
       to: customerEmail,
       subject: 'Your ELMT.Store Order Confirmation',
       html: customerTemplate({ customerName, orderId, cart, paymentMethod, total, txHash, chainId, shippingAddress }),
     })
 
+    // Send internal notifications
     for (const email of INTERNAL_EMAILS) {
       await sendEmail({
         to: email,
