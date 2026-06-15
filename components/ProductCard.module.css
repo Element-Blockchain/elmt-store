@@ -74,24 +74,24 @@
 .priceElmt { font-size: 18px; font-weight: 800; color: var(--accent); }
 .priceUsd { font-size: 12px; color: var(--gray); margin-top: 2px; }
 
-.chips { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.chips { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 16px; }
 .chip { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); color: var(--gray); }
 
-.qtyRow { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.qtyRow { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: 4px; }
 .qtyLabel { font-size: 12px; color: var(--gray); }
-.qtyControls { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.qtyControls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .qtyBtn {
-  width: 26px; height: 26px;
+  width: 32px; height: 32px;
   background: var(--surface2);
   border: 1px solid var(--border);
   color: var(--white);
-  border-radius: 6px;
-  font-size: 14px; font-weight: 700;
+  border-radius: 8px;
+  font-size: 16px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   transition: border-color 0.2s;
 }
 .qtyBtn:hover { border-color: var(--accent); }
-.qtyVal { font-size: 14px; font-weight: 700; min-width: 20px; text-align: center; }
+.qtyVal { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
 .qtyMax { font-size: 11px; color: var(--gray); margin-left: 4px; }
 
 .addBtn {
