@@ -18,7 +18,7 @@
 
 .cartBtn {
   background: var(--surface2);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.25);
   color: var(--white);
   padding: 8px 16px;
   border-radius: 8px;
@@ -28,6 +28,7 @@
   align-items: center;
   gap: 6px;
   transition: border-color 0.2s;
+  white-space: nowrap;
 }
 .cartBtn:hover { border-color: var(--accent); }
 
@@ -36,23 +37,26 @@
   color: #000;
   font-size: 10px;
   font-weight: 800;
+  min-width: 18px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .connectBtn {
   background: var(--accent);
   color: #000;
   border: 1px solid transparent;
-  padding: 8px 18px;
+  padding: 8px 12px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 .connectBtn:hover {
   background: var(--surface2);
@@ -66,3 +70,11 @@
   font-size: 12px;
 }
 .connected:hover { border-color: var(--white); background: var(--surface2); color: var(--accent); }
+
+@media (max-width: 480px) {
+  .nav { padding: 12px 16px; }
+  .cartBtn { padding: 8px 10px; font-size: 12px; }
+  .connectBtn { padding: 8px 10px; font-size: 11px; }
+  .logoText { font-size: 14px; }
+  .logoImg { width: 26px; height: 26px; }
+}
