@@ -136,7 +136,36 @@ async function sendEmail({ to, subject, html }) {
   return res.json()
 }
 
-async function logOrderToSupabase({ orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress }) {
+async function createBrevoContact({ customerEmail, customerName }) {
+  try {
+    const firstName = customerName ? customerName.split(' ')[0] : ''
+    const lastName = customerName ? customerName.split(' ').slice(1).join(' ') : ''
+
+    const res = await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: customerEmail,
+        attributes: {
+          FIRSTNAME: firstName,
+          LASTNAME: lastName,
+        },
+        listIds: [67, 34],
+        updateEnabled: true,
+        tags: ['elmt-store-customer'],
+      }),
+    })
+    if (!res.ok) {
+      const err = await res.text()
+      console.error('Brevo contact error:', err)
+    }
+  } catch (err) {
+    console.error('Failed to create Brevo contact:', err)
+  }
+} orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress }) {
   try {
     const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0)
     const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/orders`, {
@@ -175,8 +204,11 @@ export async function POST(request) {
     const body = await request.json()
     const { customerEmail, customerName, orderId, txHash, chainId, paymentMethod, cart, total, shippingAddress } = body
 
-    // Log to Supabase (non-blocking -- don't fail order if this fails)
+    // Log to Supabase (non-blocking)
     logOrderToSupabase({ orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress })
+
+    // Create/update Brevo contact (non-blocking)
+    createBrevoContact({ customerEmail, customerName })
 
     // Send customer confirmation email
     await sendEmail({
