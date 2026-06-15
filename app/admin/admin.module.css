@@ -74,6 +74,7 @@
 .headerLogo { width: 28px; height: 28px; border-radius: 50%; }
 .headerTitle { font-size: 15px; font-weight: 800; color: var(--white); }
 .headerTitle span { color: var(--accent); }
+.headerRight { display: flex; align-items: center; gap: 8px; }
 .refreshBtn {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -85,6 +86,64 @@
   transition: border-color 0.2s;
 }
 .refreshBtn:hover { border-color: var(--accent); }
+.exportBtn {
+  background: var(--accent);
+  border: none;
+  color: #000;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: background 0.2s;
+}
+.exportBtn:hover { background: #f5ff40; }
+.exportBtn:disabled { background: var(--border); color: var(--gray); cursor: not-allowed; }
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 32px 20px;
+  flex-wrap: wrap;
+}
+.searchInput {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 260px;
+}
+.searchInput:focus { outline: none; border-color: var(--accent); }
+.searchInput::placeholder { color: var(--gray); }
+.filterSelect {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--white);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+.filterSelect:focus { outline: none; border-color: var(--accent); }
+.clearBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--gray);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.clearBtn:hover { border-color: var(--danger); color: var(--danger); }
+.filterCount {
+  font-size: 12px;
+  color: var(--gray);
+  margin-left: auto;
+}
 
 .stats {
   display: grid;
@@ -158,5 +217,8 @@
 
 @media (max-width: 768px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
-  .header, .tableWrap, .stats { padding-left: 16px; padding-right: 16px; }
+  .header, .tableWrap, .stats, .filters { padding-left: 16px; padding-right: 16px; }
+  .searchInput { width: 100%; }
+  .filters { flex-direction: column; align-items: stretch; }
+  .filterCount { margin-left: 0; }
 }
