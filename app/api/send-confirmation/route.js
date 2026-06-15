@@ -165,7 +165,9 @@ async function createBrevoContact({ customerEmail, customerName }) {
   } catch (err) {
     console.error('Failed to create Brevo contact:', err)
   }
-} orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress }) {
+} 
+
+async function logOrderToSupabase({ orderId, customerName, customerEmail, paymentMethod, txHash, chainId, cart, total, shippingAddress }) {
   try {
     const totalUSD = cart.reduce((s, i) => s + i.priceUSD * i.qty, 0)
     const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/orders`, {
